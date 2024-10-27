@@ -24,6 +24,11 @@ pub struct UserTask {
     desc: String,
     completed: bool,
     quiz_name: Option<i64>,
+    // Add the missing fields
+    calls: Option<Vec<String>>,
+    contracts: Option<Vec<String>>,
+    api_url: Option<String>,
+    regex: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -99,6 +104,10 @@ pub async fn handler(
                 "desc": 1,
                 "completed": { "$gt": [ { "$size": "$completed" }, 0 ] },
                 "quiz_name": 1,
+                "calls": 1,
+                "contracts": 1,
+                "api_url": 1,
+                "regex": 1
             }
         },
     ];
