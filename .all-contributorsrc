@@ -17,6 +17,17 @@
         "business",
         "ideas"
       ]
+    },
+    {
+      "login": "Th0rgal",
+      "name": "Thomas Marchand",
+      "avatar_url": "https://avatars.githubusercontent.com/u/41830259?v=4",
+      "profile": "https://github.com/Th0rgal",
+      "contributions": [
+        "code",
+        "business",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
