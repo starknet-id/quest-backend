@@ -1,6 +1,6 @@
 # API Starknet Quest
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 API for Starknet Quest Client project built in Rust
@@ -185,6 +185,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Gerson2102"><img src="https://avatars.githubusercontent.com/u/71728860?v=4?s=100" width="100px;" alt="Gerson"/><br /><sub><b>Gerson</b></sub></a><br /><a href="https://github.com/lfglabs-dev/api.starknet.quest/commits?author=Gerson2102" title="Code">💻</a> <a href="#business-Gerson2102" title="Business development">💼</a> <a href="#ideas-Gerson2102" title="Ideas, Planning, & Feedback">🤔</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Th0rgal"><img src="https://avatars.githubusercontent.com/u/41830259?v=4?s=100" width="100px;" alt="Thomas Marchand"/><br /><sub><b>Thomas Marchand</b></sub></a><br /><a href="https://github.com/lfglabs-dev/api.starknet.quest/commits?author=Th0rgal" title="Code">💻</a> <a href="#business-Th0rgal" title="Business development">💼</a> <a href="#ideas-Th0rgal" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Marchand-Nicolas"><img src="https://avatars.githubusercontent.com/u/60229704?v=4?s=100" width="100px;" alt="Nico"/><br /><sub><b>Nico</b></sub></a><br /><a href="https://github.com/lfglabs-dev/api.starknet.quest/commits?author=Marchand-Nicolas" title="Code">💻</a> <a href="#business-Marchand-Nicolas" title="Business development">💼</a> <a href="#ideas-Marchand-Nicolas" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
   </tbody>
 </table>
