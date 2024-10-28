@@ -1,4 +1,7 @@
 # API Starknet Quest
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 API for Starknet Quest Client project built in Rust
 
@@ -170,3 +173,24 @@ Failed to post log: "Invalid token or token expired"
 ```
 
 This means that you didn't setup the credentials for Watchtower. To fix this, you'll need to set the `enabled` field in `[watchtower]` to false in the `config.toml` file. Please refer the second step of the section Running the Project for further instructions if you wish to keep the `[watchtower]` enabled.
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Gerson2102"><img src="https://avatars.githubusercontent.com/u/71728860?v=4?s=100" width="100px;" alt="Gerson"/><br /><sub><b>Gerson</b></sub></a><br /><a href="https://github.com/lfglabs-dev/api.starknet.quest/commits?author=Gerson2102" title="Code">💻</a> <a href="#business-Gerson2102" title="Business development">💼</a> <a href="#ideas-Gerson2102" title="Ideas, Planning, & Feedback">🤔</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
