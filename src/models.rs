@@ -453,6 +453,34 @@ pub struct EkuboRewards {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct VesuRewards {
+    pub data: VesuData,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct VesuData {
+    pub wallet_address: FieldElement,
+    pub amount: FieldElement,
+    pub decimals: u8,
+    pub distributor_data: VesuDistributorData,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct VesuDistributorData {
+    pub distributed_amount: String,
+    pub claimed_amount: String,
+    pub call_data: VesuCallData,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct VesuCallData {
+    pub amount: String,
+    pub proof: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Claim {
     pub id: u64,
     pub amount: FieldElement,
@@ -465,6 +493,7 @@ pub enum RewardSource {
     Nostra,
     Nimbora,
     Ekubo,
+    Vesu,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

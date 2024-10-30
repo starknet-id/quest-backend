@@ -1,7 +1,7 @@
 use crate::{
     models::{
         AppState, CommonReward, ContractCall, DefiReward, EkuboRewards, NimboraRewards,
-        NostraPeriodsResponse, NostraResponse, RewardSource, ZkLendReward,
+        NostraPeriodsResponse, NostraResponse, RewardSource, ZkLendReward, VesuRewards
     },
     utils::{check_if_claimed, read_contract, to_hex, to_hex_trimmed},
 };
@@ -41,23 +41,26 @@ pub async fn get_defi_rewards(
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
 
-    let (zklend_rewards, nostra_rewards, nimbora_rewards, ekubo_rewards) = tokio::join!(
+    let (zklend_rewards, nostra_rewards, nimbora_rewards, ekubo_rewards, vesu_rewards) = tokio::join!(
         fetch_zklend_rewards(&client, &addr),
         fetch_nostra_rewards(&client, &addr, &state),
         fetch_nimbora_rewards(&client, &addr, &state),
         fetch_ekubo_rewards(&client, &addr, &state),
+        fetch_vesu_rewards(&client, &addr, &state),
     );
 
     let zklend_rewards = zklend_rewards.unwrap_or_default();
     let nostra_rewards = nostra_rewards.unwrap_or_default();
     let nimbora_rewards = nimbora_rewards.unwrap_or_default();
     let ekubo_rewards = ekubo_rewards.unwrap_or_default();
+    let vesu_rewards = vesu_rewards.unwrap_or_default();
 
     let all_rewards = [
         &zklend_rewards,
         &nostra_rewards,
         &nimbora_rewards,
         &ekubo_rewards,
+        &vesu_rewards,
     ];
 
     let all_calls: Vec<ContractCall> = all_rewards
@@ -70,7 +73,8 @@ pub async fn get_defi_rewards(
             "zklend": extract_rewards(&zklend_rewards),
             "nostra": extract_rewards(&nostra_rewards),
             "nimbora": extract_rewards(&nimbora_rewards),
-            "ekubo": extract_rewards(&ekubo_rewards)
+            "ekubo": extract_rewards(&ekubo_rewards),
+            "vesu": extract_rewards(&vesu_rewards)
         },
         "calls": all_calls
     });
@@ -322,6 +326,48 @@ async fn fetch_ekubo_rewards(
     Ok(active_rewards)
 }
 
+async fn fetch_vesu_rewards(
+    client: &ClientWithMiddleware,
+    addr: &str,
+    state: &AppState,
+) -> Result<Vec<CommonReward>, Error> {
+    let vesu_url = format!("https://staging.api.vesu.xyz/users/{}/strk-rewards", addr);
+    let response = client
+        .get(&vesu_url)
+        .headers(get_headers())
+        .send()
+        .await?;
+
+    
+
+    match response.json::<VesuRewards>().await {
+        Ok(result) => {
+            let strk_token = state.conf.tokens.strk.clone();
+            let config = &state.conf;
+
+            let disctributed_amount : u64 = result.data.distributor_data.distributed_amount.parse().expect("Failed to parse string to integer");
+            let claimed_amount : u64 = result.data.distributor_data.claimed_amount.parse().expect("Failed to parse string to integer");
+            let amount = disctributed_amount - claimed_amount;
+
+            let reward = CommonReward {
+                amount: amount.into(),
+                displayed_amount: amount.into(),
+                proof: result.data.distributor_data.call_data.proof,
+                reward_id: None,
+                claim_contract: config.rewards.vesu.contract,
+                token_symbol: strk_token.symbol,
+                reward_source: RewardSource::Vesu,
+                claimed: false,
+            };
+            Ok(vec![reward])
+        }
+        Err(err) => {
+            eprintln!("Failed to deserialize vesu response: {:?}", err);
+            Err(Error::Reqwest(err))
+        }
+    }
+}
+
 fn create_calls(rewards: &[CommonReward], addr: &str) -> Vec<ContractCall> {
     rewards
         .iter()
@@ -338,7 +384,7 @@ fn create_calls(rewards: &[CommonReward], addr: &str) -> Vec<ContractCall> {
                     data.extend(reward.proof.clone());
                     data
                 }
-                RewardSource::Nimbora | RewardSource::Nostra => {
+                RewardSource::Nimbora | RewardSource::Nostra | RewardSource::Vesu => {
                     let mut data = vec![
                         to_hex_trimmed(reward.amount),
                         to_hex_trimmed(FieldElement::from(reward.proof.len())),
