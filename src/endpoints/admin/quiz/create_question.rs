@@ -1,6 +1,6 @@
 use crate::middleware::auth::auth_middleware;
 use crate::models::{QuestDocument, QuestTaskDocument, QuizInsertDocument, QuizQuestionDocument};
-use crate::utils::get_next_task_id;
+use crate::utils::get_next_question_id;
 use crate::utils::verify_quest_auth;
 use crate::{models::AppState, utils::get_error};
 use axum::{
@@ -47,7 +47,7 @@ pub async fn handler(
 
     let res = verify_quest_auth(sub, &quests_collection, &quest_id).await;
     if !res {
-        return get_error("Error creating task".to_string());
+        return get_error("Error creating question".to_string());
     };
 
     // filter to get existing quiz
@@ -63,16 +63,18 @@ pub async fn handler(
         return get_error("quiz does not exist".to_string());
     }
 
-    let state_last_id = state.last_task_id.lock().await;
+    let mut state_last_id = state.last_question_id.lock().await;
 
-    let next_quiz_question_id = get_next_task_id(&tasks_collection, state_last_id.clone()).await;
+    let next_quiz_question_id = get_next_question_id(&quiz_questions_collection, state_last_id.clone()).await;
+
+    *state_last_id = next_quiz_question_id;
 
     let new_quiz_document = QuizQuestionDocument {
         quiz_id: body.quiz_id.clone(),
         question: body.question.clone(),
         options: body.options.clone(),
         correct_answers: body.correct_answers.clone(),
-        id: next_quiz_question_id.into(),
+        id: next_quiz_question_id,
         kind: "text_choice".to_string(),
         layout: "default".to_string(),
     };
@@ -83,9 +85,9 @@ pub async fn handler(
     {
         Ok(_) => (
             StatusCode::OK,
-            Json(json!({"message": "Task created successfully"})).into_response(),
+            Json(json!({"message": "Question created successfully"})).into_response(),
         )
             .into_response(),
-        Err(_e) => return get_error("Error creating task".to_string()),
+        Err(_e) => return get_error("Error creating question".to_string()),
     };
 }

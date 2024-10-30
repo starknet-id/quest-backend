@@ -1,6 +1,6 @@
 use crate::logger::Logger;
 use crate::models::{
-    AchievementDocument, AppState, BoostTable, CompletedTasks, LeaderboardTable, QuestDocument, QuestTaskDocument, RewardSource, UserExperience
+    AchievementDocument, AppState, BoostTable, CompletedTasks, LeaderboardTable, QuestDocument, QuestTaskDocument, QuizQuestionDocument, RewardSource, UserExperience
 };
 use async_trait::async_trait;
 use axum::{
@@ -881,6 +881,27 @@ pub async fn get_next_task_id(
         return std::cmp::max(db_last_id as i32, (last_task_id).try_into().unwrap()) + 1;
     } else {
         return (last_task_id as i32) + 1;
+    }
+}
+
+pub async fn get_next_question_id(
+    question_collection: &Collection<QuizQuestionDocument>,
+    last_question_id: i64,
+) -> i64 {
+    let last_id_filter = doc! {};
+    let options = FindOneOptions::builder().sort(doc! {"id": -1}).build();
+
+    let last_doc = question_collection
+        .find_one(last_id_filter, options)
+        .await
+        .unwrap();
+
+    if let Some(doc) = last_doc {
+        let db_last_id = doc.id;
+
+        return std::cmp::max(db_last_id, last_question_id) + 1;
+    } else {
+        return last_question_id + 1;
     }
 }
 

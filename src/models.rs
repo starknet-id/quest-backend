@@ -12,6 +12,7 @@ use tokio::sync::Mutex;
 
 pub_struct!(;AppState {
     last_task_id: Mutex<i64>,
+    last_question_id: Mutex<i64>,
     conf: Config,
     provider: JsonRpcClient<HttpTransport>,
     db: Database,

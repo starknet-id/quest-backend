@@ -55,6 +55,7 @@ async fn main() {
 
     let shared_state = Arc::new(models::AppState {
         last_task_id: sync::Mutex::new(0),
+        last_question_id: sync::Mutex::new(0),
         logger: logger.clone(),
         conf: conf.clone(),
         provider: JsonRpcClient::new(HttpTransport::new(
