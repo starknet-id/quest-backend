@@ -338,16 +338,23 @@ async fn fetch_vesu_rewards(
         .send()
         .await?;
 
+    
 
     match response.json::<VesuRewards>().await {
         Ok(result) => {
             let strk_token = state.conf.tokens.strk.clone();
+            let config = &state.conf;
+
+            let disctributed_amount : u64 = result.data.distributor_data.distributed_amount.parse().expect("Failed to parse string to integer");
+            let claimed_amount : u64 = result.data.distributor_data.claimed_amount.parse().expect("Failed to parse string to integer");
+            let amount = disctributed_amount - claimed_amount;
+
             let reward = CommonReward {
-                amount: result.data.amount,
-                displayed_amount: result.data.amount,
+                amount: amount.into(),
+                displayed_amount: amount.into(),
                 proof: result.data.distributor_data.call_data.proof,
                 reward_id: None,
-                claim_contract: result.data.wallet_address,
+                claim_contract: config.rewards.vesu.contract,
                 token_symbol: strk_token.symbol,
                 reward_source: RewardSource::Vesu,
                 claimed: false,

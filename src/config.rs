@@ -196,6 +196,7 @@ pub_struct!(Clone, Deserialize;  ProtocolStats {
 
 pub_struct!(Clone, Deserialize;  Rewards {
     nimbora: Contract,
+    vesu: Contract,
 });
 
 pub_struct!(Clone, Deserialize;  Token {
