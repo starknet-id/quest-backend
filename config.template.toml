@@ -86,6 +86,8 @@ api_endpoint = "xxxxxxx"
 [rewards]
 [rewards.nimbora]
 contract = "0x07ed46700bd12bb1ee8a33a8594791003f9710a1ab18edd958aed86a8f82d3d1"
+[rewards.vesu]
+contract = "0x0387f3eb1d98632fbe3440a9f1385aec9d87b6172491d3dd81f1c35a7c61048f"
 
 [tokens]
 [tokens.strk]
