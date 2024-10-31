@@ -1,7 +1,7 @@
 use crate::{
     models::{
         AppState, CommonReward, ContractCall, DefiReward, EkuboRewards, NimboraRewards,
-        NostraPeriodsResponse, NostraResponse, RewardSource, ZkLendReward, VesuRewards
+        NostraPeriodsResponse, NostraResponse, RewardSource, VesuRewards, ZkLendReward,
     },
     utils::{check_if_claimed, read_contract, to_hex, to_hex_trimmed},
 };
@@ -332,22 +332,31 @@ async fn fetch_vesu_rewards(
     state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
     let vesu_url = format!("https://staging.api.vesu.xyz/users/{}/strk-rewards", addr);
-    let response = client
-        .get(&vesu_url)
-        .headers(get_headers())
-        .send()
-        .await?;
-
-    
+    let response = client.get(&vesu_url).headers(get_headers()).send().await?;
 
     match response.json::<VesuRewards>().await {
         Ok(result) => {
             let strk_token = state.conf.tokens.strk.clone();
             let config = &state.conf;
 
-            let disctributed_amount : u64 = result.data.distributor_data.distributed_amount.parse().expect("Failed to parse string to integer");
-            let claimed_amount : u64 = result.data.distributor_data.claimed_amount.parse().expect("Failed to parse string to integer");
+            let disctributed_amount: u64 = result
+                .data
+                .distributor_data
+                .distributed_amount
+                .parse()
+                .expect("Failed to parse string to integer");
+            let claimed_amount: u64 = result
+                .data
+                .distributor_data
+                .claimed_amount
+                .parse()
+                .expect("Failed to parse string to integer");
             let amount = disctributed_amount - claimed_amount;
+
+            // If amount is 0, return empty vector
+            if amount == 0 {
+                return Ok(vec![]);
+            }
 
             let reward = CommonReward {
                 amount: amount.into(),
