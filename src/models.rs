@@ -280,8 +280,8 @@ pub_struct!(Debug, Serialize, Deserialize; BoostTable {
     img_url: String,
     name: String,
     hidden: bool,
-    num_of_winners: i64,
-    token_decimals: i64,
+    num_of_winners: i32,
+    token_decimals: i32,
 });
 
 pub_struct!(Debug, Serialize, Deserialize; NftBalance {
