@@ -18,8 +18,8 @@ use std::sync::Arc;
 pub struct CreateBoostQuery {
     amount: i32,
     token: String,
-    num_of_winners: i64,
-    token_decimals: i64,
+    num_of_winners: i32,
+    token_decimals: i32,
     name: String,
     quest_id: i32,
     hidden: bool,
