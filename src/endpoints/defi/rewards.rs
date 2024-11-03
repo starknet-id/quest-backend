@@ -332,7 +332,7 @@ async fn fetch_ekubo_rewards(
         .collect();
     let active_rewards: Vec<CommonReward> =
         tasks.filter_map(|res| async move { res }).collect().await;
-    // If several tasks have both the same start and end date, only the last one will should returned
+    // If several tasks have both the same start and end date, only the last one should returned
     let filtered_tasks =
         active_rewards
             .into_iter()
