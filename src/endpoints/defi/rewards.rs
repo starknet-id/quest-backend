@@ -337,14 +337,15 @@ async fn fetch_ekubo_rewards(
         active_rewards
             .into_iter()
             .fold(Vec::<CommonReward>::new(), |mut acc, reward| {
-                if let Some(last) = acc.last() {
-                    if last.start_date == reward.start_date && last.end_date == reward.end_date {
-                        acc.pop();
-                    }
+                if !acc
+                    .iter()
+                    .any(|r| r.start_date == reward.start_date && r.end_date == reward.end_date)
+                {
+                    acc.push(reward);
                 }
-                acc.push(reward);
                 acc
             });
+
     Ok(filtered_tasks)
 }
 
