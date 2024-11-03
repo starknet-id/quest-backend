@@ -107,6 +107,8 @@ async fn fetch_zklend_rewards(
                     token_symbol: reward.token.symbol,
                     reward_source: RewardSource::ZkLend,
                     claimed: reward.claimed,
+                    start_date: None,
+                    end_date: None,
                 })
                 .collect();
             Ok(rewards)
@@ -203,6 +205,8 @@ async fn fetch_nostra_rewards(
                             token_symbol,
                             reward_source: RewardSource::Nostra,
                             claimed: false,
+                            start_date: None,
+                            end_date: None,
                         })
                     } else {
                         None
@@ -259,6 +263,8 @@ async fn fetch_nimbora_rewards(
                 claim_contract: config.rewards.nimbora.contract,
                 reward_source: RewardSource::Nimbora,
                 claimed: false,
+                start_date: None,
+                end_date: None,
             };
             Ok(vec![reward])
         }
@@ -315,6 +321,8 @@ async fn fetch_ekubo_rewards(
                         token_symbol: strk_token.symbol,
                         reward_source: RewardSource::Ekubo,
                         claimed: false,
+                        start_date: Some(reward.start_date),
+                        end_date: Some(reward.end_date),
                     })
                 } else {
                     None
@@ -322,8 +330,22 @@ async fn fetch_ekubo_rewards(
             }
         })
         .collect();
-    let active_rewards = tasks.filter_map(|res| async move { res }).collect().await;
-    Ok(active_rewards)
+    let active_rewards: Vec<CommonReward> =
+        tasks.filter_map(|res| async move { res }).collect().await;
+    // If several tasks have both the same start and end date, only the last one will should returned
+    let filtered_tasks =
+        active_rewards
+            .into_iter()
+            .fold(Vec::<CommonReward>::new(), |mut acc, reward| {
+                if let Some(last) = acc.last() {
+                    if last.start_date == reward.start_date && last.end_date == reward.end_date {
+                        acc.pop();
+                    }
+                }
+                acc.push(reward);
+                acc
+            });
+    Ok(filtered_tasks)
 }
 
 async fn fetch_vesu_rewards(
@@ -367,6 +389,8 @@ async fn fetch_vesu_rewards(
                 token_symbol: strk_token.symbol,
                 reward_source: RewardSource::Vesu,
                 claimed: false,
+                start_date: None,
+                end_date: None,
             };
             Ok(vec![reward])
         }

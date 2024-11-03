@@ -507,6 +507,8 @@ pub struct CommonReward {
     pub token_symbol: String,
     pub reward_source: RewardSource,
     pub claimed: bool,
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
