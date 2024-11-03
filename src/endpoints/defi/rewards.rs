@@ -359,7 +359,7 @@ async fn fetch_vesu_rewards(
             }
 
             let reward = CommonReward {
-                amount: amount.into(),
+                amount: FieldElement::from(disctributed_amount),
                 displayed_amount: amount.into(),
                 proof: result.data.distributor_data.call_data.proof,
                 reward_id: None,
