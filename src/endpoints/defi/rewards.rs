@@ -361,14 +361,13 @@ async fn fetch_vesu_rewards(
         Ok(result) => {
             let strk_token = state.conf.tokens.strk.clone();
             let config = &state.conf;
-
-            let disctributed_amount: u64 = result
+            let disctributed_amount: FieldElement = result
                 .data
                 .distributor_data
                 .distributed_amount
                 .parse()
                 .expect("Failed to parse string to integer");
-            let claimed_amount: u64 = result
+            let claimed_amount: FieldElement = result
                 .data
                 .distributor_data
                 .claimed_amount
@@ -377,13 +376,13 @@ async fn fetch_vesu_rewards(
             let amount = disctributed_amount - claimed_amount;
 
             // If amount is 0, return empty vector
-            if amount == 0 {
+            if amount == FieldElement::ZERO {
                 return Ok(vec![]);
             }
 
             let reward = CommonReward {
-                amount: FieldElement::from(disctributed_amount),
-                displayed_amount: amount.into(),
+                amount: disctributed_amount,
+                displayed_amount: amount,
                 proof: result.data.distributor_data.call_data.proof,
                 reward_id: None,
                 claim_contract: config.rewards.vesu.contract,
