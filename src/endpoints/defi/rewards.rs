@@ -354,7 +354,7 @@ async fn fetch_vesu_rewards(
     addr: &str,
     state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
-    let vesu_url = format!("https://staging.api.vesu.xyz/users/{}/strk-rewards", addr);
+    let vesu_url = format!("https://api.vesu.xyz/users/{}/strk-rewards", addr);
     let response = client.get(&vesu_url).headers(get_headers()).send().await?;
 
     match response.json::<VesuRewards>().await {
