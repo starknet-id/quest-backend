@@ -3,7 +3,7 @@ use crate::{
         AppState, CommonReward, ContractCall, DefiReward, EkuboRewards, NimboraRewards,
         NostraPeriodsResponse, NostraResponse, RewardSource, VesuRewards, ZkLendReward,
     },
-    utils::{check_if_claimed, read_contract, to_hex, to_hex_trimmed},
+    utils::{check_if_unclaimed, read_contract, to_hex, to_hex_trimmed},
 };
 use axum::{
     extract::{Query, State},
@@ -187,7 +187,7 @@ async fn fetch_nostra_rewards(
                 if let Some(distributor) =
                     matching_period.and_then(|period| period.defi_spring_rewards_distributor)
                 {
-                    if check_if_claimed(
+                    if check_if_unclaimed(
                         state,
                         distributor,
                         selector!("amount_already_claimed"),
@@ -296,14 +296,14 @@ async fn fetch_ekubo_rewards(
             return Err(Error::Reqwest(err));
         }
     };
-
+    let last_reward_id = rewards.last().map(|reward| reward.claim.id);
     let tasks: FuturesOrdered<_> = rewards
         .into_iter()
         .rev()
         .map(|reward| {
             let strk_token = strk_token.clone();
             async move {
-                if check_if_claimed(
+                if check_if_unclaimed(
                     state,
                     reward.contract_address,
                     selector!("is_claimed"),
@@ -332,6 +332,10 @@ async fn fetch_ekubo_rewards(
         .collect();
     let active_rewards: Vec<CommonReward> =
         tasks.filter_map(|res| async move { res }).collect().await;
+    if active_rewards.len() >= 1 && active_rewards[0].reward_id.unwrap() != last_reward_id.unwrap()
+    {
+        return Ok(vec![]);
+    }
     // If several tasks have both the same start and end date, only the last one should returned
     let filtered_tasks =
         active_rewards
