@@ -1,6 +1,7 @@
 use crate::logger::Logger;
 use crate::models::{
-    AchievementDocument, AppState, BoostTable, CompletedTasks, LeaderboardTable, QuestDocument, QuestTaskDocument, QuizQuestionDocument, RewardSource, UserExperience
+    AchievementDocument, AppState, BoostTable, CompletedTasks, LeaderboardTable, QuestDocument,
+    QuestTaskDocument, QuizQuestionDocument, RewardSource, UserExperience,
 };
 use async_trait::async_trait;
 use axum::{
@@ -924,12 +925,12 @@ pub async fn read_contract(
         .await
 }
 
-pub async fn check_if_claimed(
+pub async fn check_if_unclaimed(
     state: &AppState,
     contract: FieldElement,
     selector: FieldElement,
     calldata: Vec<FieldElement>,
-    source: RewardSource
+    source: RewardSource,
 ) -> bool {
     match read_contract(state, contract, selector, calldata).await {
         Ok(result) => result.get(0) == Some(&FieldElement::ZERO),

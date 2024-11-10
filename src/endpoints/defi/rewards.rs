@@ -3,7 +3,7 @@ use crate::{
         AppState, CommonReward, ContractCall, DefiReward, EkuboRewards, NimboraRewards,
         NostraPeriodsResponse, NostraResponse, RewardSource, VesuRewards, ZkLendReward,
     },
-    utils::{check_if_claimed, read_contract, to_hex, to_hex_trimmed},
+    utils::{check_if_unclaimed, read_contract, to_hex, to_hex_trimmed},
 };
 use axum::{
     extract::{Query, State},
@@ -107,6 +107,8 @@ async fn fetch_zklend_rewards(
                     token_symbol: reward.token.symbol,
                     reward_source: RewardSource::ZkLend,
                     claimed: reward.claimed,
+                    start_date: None,
+                    end_date: None,
                 })
                 .collect();
             Ok(rewards)
@@ -185,7 +187,7 @@ async fn fetch_nostra_rewards(
                 if let Some(distributor) =
                     matching_period.and_then(|period| period.defi_spring_rewards_distributor)
                 {
-                    if check_if_claimed(
+                    if check_if_unclaimed(
                         state,
                         distributor,
                         selector!("amount_already_claimed"),
@@ -203,6 +205,8 @@ async fn fetch_nostra_rewards(
                             token_symbol,
                             reward_source: RewardSource::Nostra,
                             claimed: false,
+                            start_date: None,
+                            end_date: None,
                         })
                     } else {
                         None
@@ -259,6 +263,8 @@ async fn fetch_nimbora_rewards(
                 claim_contract: config.rewards.nimbora.contract,
                 reward_source: RewardSource::Nimbora,
                 claimed: false,
+                start_date: None,
+                end_date: None,
             };
             Ok(vec![reward])
         }
@@ -290,14 +296,14 @@ async fn fetch_ekubo_rewards(
             return Err(Error::Reqwest(err));
         }
     };
-
+    let last_reward_id = rewards.last().map(|reward| reward.claim.id);
     let tasks: FuturesOrdered<_> = rewards
         .into_iter()
         .rev()
         .map(|reward| {
             let strk_token = strk_token.clone();
             async move {
-                if check_if_claimed(
+                if check_if_unclaimed(
                     state,
                     reward.contract_address,
                     selector!("is_claimed"),
@@ -315,6 +321,8 @@ async fn fetch_ekubo_rewards(
                         token_symbol: strk_token.symbol,
                         reward_source: RewardSource::Ekubo,
                         claimed: false,
+                        start_date: Some(reward.start_date),
+                        end_date: Some(reward.end_date),
                     })
                 } else {
                     None
@@ -322,8 +330,27 @@ async fn fetch_ekubo_rewards(
             }
         })
         .collect();
-    let active_rewards = tasks.filter_map(|res| async move { res }).collect().await;
-    Ok(active_rewards)
+    let active_rewards: Vec<CommonReward> =
+        tasks.filter_map(|res| async move { res }).collect().await;
+    if active_rewards.len() >= 1 && active_rewards[0].reward_id.unwrap() != last_reward_id.unwrap()
+    {
+        return Ok(vec![]);
+    }
+    // If several tasks have both the same start and end date, only the last one should returned
+    let filtered_tasks =
+        active_rewards
+            .into_iter()
+            .fold(Vec::<CommonReward>::new(), |mut acc, reward| {
+                if !acc
+                    .iter()
+                    .any(|r| r.start_date == reward.start_date && r.end_date == reward.end_date)
+                {
+                    acc.push(reward);
+                }
+                acc
+            });
+
+    Ok(filtered_tasks)
 }
 
 async fn fetch_vesu_rewards(
@@ -331,21 +358,20 @@ async fn fetch_vesu_rewards(
     addr: &str,
     state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
-    let vesu_url = format!("https://staging.api.vesu.xyz/users/{}/strk-rewards", addr);
+    let vesu_url = format!("https://api.vesu.xyz/users/{}/strk-rewards", addr);
     let response = client.get(&vesu_url).headers(get_headers()).send().await?;
 
     match response.json::<VesuRewards>().await {
         Ok(result) => {
             let strk_token = state.conf.tokens.strk.clone();
             let config = &state.conf;
-
-            let disctributed_amount: u64 = result
+            let disctributed_amount: FieldElement = result
                 .data
                 .distributor_data
                 .distributed_amount
                 .parse()
                 .expect("Failed to parse string to integer");
-            let claimed_amount: u64 = result
+            let claimed_amount: FieldElement = result
                 .data
                 .distributor_data
                 .claimed_amount
@@ -354,19 +380,21 @@ async fn fetch_vesu_rewards(
             let amount = disctributed_amount - claimed_amount;
 
             // If amount is 0, return empty vector
-            if amount == 0 {
+            if amount == FieldElement::ZERO {
                 return Ok(vec![]);
             }
 
             let reward = CommonReward {
-                amount: FieldElement::from(disctributed_amount),
-                displayed_amount: amount.into(),
+                amount: disctributed_amount,
+                displayed_amount: amount,
                 proof: result.data.distributor_data.call_data.proof,
                 reward_id: None,
                 claim_contract: config.rewards.vesu.contract,
                 token_symbol: strk_token.symbol,
                 reward_source: RewardSource::Vesu,
                 claimed: false,
+                start_date: None,
+                end_date: None,
             };
             Ok(vec![reward])
         }
