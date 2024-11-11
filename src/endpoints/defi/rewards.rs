@@ -296,8 +296,10 @@ async fn fetch_ekubo_rewards(
             return Err(Error::Reqwest(err));
         }
     };
-    let last_reward_id = rewards.last().map(|reward| reward.claim.id);
-    let last_reward_amount = rewards.last().map(|reward| reward.claim.amount);
+    let (last_reward_id, last_reward_amount) = rewards
+        .last()
+        .map(|reward| (reward.claim.id, reward.claim.amount))
+        .unzip();
     let tasks: FuturesOrdered<_> = rewards
         .into_iter()
         .rev()
