@@ -105,7 +105,7 @@ pub_struct!(Deserialize; CompletedTasks {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CompletedTaskDocument {
-    address: String,
+    pub address: String,
     task_id: u32,
     timestamp: i64,
 }
