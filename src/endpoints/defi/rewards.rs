@@ -296,7 +296,10 @@ async fn fetch_ekubo_rewards(
             return Err(Error::Reqwest(err));
         }
     };
-    let last_reward_id = rewards.last().map(|reward| reward.claim.id);
+    let (last_reward_id, last_reward_amount) = rewards
+        .last()
+        .map(|reward| (reward.claim.id, reward.claim.amount))
+        .unzip();
     let tasks: FuturesOrdered<_> = rewards
         .into_iter()
         .rev()
@@ -332,7 +335,10 @@ async fn fetch_ekubo_rewards(
         .collect();
     let active_rewards: Vec<CommonReward> =
         tasks.filter_map(|res| async move { res }).collect().await;
-    if active_rewards.len() >= 1 && active_rewards[0].reward_id.unwrap() != last_reward_id.unwrap()
+    // We check if the latest reward has already been claimed
+    if active_rewards.len() >= 1
+        && (active_rewards[0].reward_id.unwrap() != last_reward_id.unwrap()
+            || active_rewards[0].amount != last_reward_amount.unwrap())
     {
         return Ok(vec![]);
     }
