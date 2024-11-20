@@ -1,6 +1,6 @@
 # API Starknet Quest
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](https://github.com/lfglabs-dev/api.starknet.quest/graphs/contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 API for Starknet Quest Client project built in Rust
