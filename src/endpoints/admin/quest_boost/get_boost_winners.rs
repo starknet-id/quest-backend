@@ -24,10 +24,10 @@ pub_struct!(Deserialize; GetQuestParticipantsParams {
     quest_id: i64,
 });
 
-#[route(get, "/admin/quests/get_quest_participants")]
+#[route(get, "/admin/quests/get_quest_participants", auth_middleware)]
 pub async fn get_quest_participants_handler(
     State(state): State<Arc<AppState>>,
-    //Extension(_sub): Extension<String>, // Assuming admin authentication is handled
+    Extension(_sub): Extension<String>,
     Query(params): Query<GetQuestParticipantsParams>,
 ) -> impl IntoResponse {
     let tasks_collection = state.db.collection::<QuestTaskDocument>("tasks");
