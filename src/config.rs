@@ -43,10 +43,12 @@ pub_struct!(Clone, Deserialize; StarknetIdContracts {
     identity_contract: FieldElement,
 });
 
-pub_struct!(Clone, Deserialize;  NamingContract { address: String });
+pub_struct!(Clone, Deserialize;  NamingContract { 
+    _address: String 
+});
 
 pub_struct!(Clone, Deserialize;  StarknetId {
-    account_id: String,
+    _account_id: String,
 });
 
 pub_struct!(Clone, Deserialize;  Nostra {
@@ -141,17 +143,17 @@ impl<'de> Deserialize<'de> for QuizQuestionType {
 
 pub_struct!(Clone, Deserialize,Debug; QuizQuestion {
     kind: QuizQuestionType,
-    layout: String,
-    question: String,
-    options: Vec<String>,
+    _layout: String,
+    _question: String,
+    _options: Vec<String>,
     correct_answers: Option<Vec<usize>>,
-    correct_order: Option<Vec<String>>,
-    image_for_layout: Option<String>,
+    _correct_order: Option<Vec<String>>,
+    _image_for_layout: Option<String>,
 });
 
 pub_struct!(Clone, Deserialize,Debug; Quiz {
-    name: String,
-    desc: String,
+    _name: String,
+    _desc: String,
     questions: Vec<QuizQuestion>,
 });
 
