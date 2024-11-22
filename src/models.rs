@@ -98,9 +98,9 @@ pub_struct!(Serialize, Deserialize; NFTUri {
 });
 
 pub_struct!(Deserialize; CompletedTasks {
-    address: String,
-    task_id: u32,
-    timestamp: i64,
+    _address: String,
+    _task_id: u32,
+    _timestamp: i64,
 });
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -174,8 +174,8 @@ pub_struct!(Deserialize; VerifyNewQuery {
 });
 
 pub_struct!(Deserialize; EmailQuery {
-    addr: FieldElement,
-    email: String,
+    _addr: FieldElement,
+    _email: String,
 });
 
 pub_struct!(Deserialize; VerifyQuizQuery {
@@ -185,14 +185,14 @@ pub_struct!(Deserialize; VerifyQuizQuery {
 });
 
 pub_struct!(Deserialize; VerifyBalanceQuery {
-    addr: FieldElement,
-    task_id: u32,
+    _addr: FieldElement,
+    _task_id: u32,
 });
 
 pub_struct!(Deserialize; UniquePageVisit {
-    viewer_ip: String,
-    viewed_page_id: String,
-    timestamp: i64,
+    _viewer_ip: String,
+    _viewed_page_id: String,
+    _timestamp: i64,
 });
 
 pub_struct!(Deserialize; AchievementQuery {
@@ -328,7 +328,7 @@ pub_struct!(Debug, Deserialize, Serialize; BuildingDocument {
 });
 
 pub_struct!(Deserialize, Debug; DeployedTime {
-    addr: String,
+    _addr: String,
     timestamp: u32,
 });
 
@@ -366,14 +366,14 @@ pub_struct!(Debug, Serialize, Deserialize; LoginDetails {
 });
 
 pub_struct!(Deserialize; CreateBoostQuery {
-    quest_id: i32,
-    amount: i32,
-    token: String,
-    num_of_winners: i32,
-    token_decimals: i32,
-    name: String,
-    img_url: String,
-    expiry: i64,
+    _quest_id: i32,
+    _amount: i32,
+    _token: String,
+    _num_of_winners: i32,
+    _token_decimals: i32,
+    _name: String,
+    _img_url: String,
+    _expiry: i64,
 });
 
 #[derive(Serialize, Deserialize, Debug)]

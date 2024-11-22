@@ -308,6 +308,7 @@ pub trait AchievementsTrait {
         achievement_id: u32,
     ) -> Result<UpdateResult, mongodb::error::Error>;
 
+    #[allow(dead_code)]
     async fn get_achievement(
         &self,
         achievement_id: u32,
@@ -794,6 +795,8 @@ pub async fn verify_quest_auth(
         None => false,
     }
 }
+
+#[allow(dead_code)]
 pub async fn make_api_request(endpoint: &str, addr: &str, api_key: Option<&str>) -> bool {
     let client = reqwest::Client::new();
     let request_builder = client.post(endpoint).json(&json!({

@@ -26,13 +26,15 @@ lazy_static::lazy_static! {
 }
 
 #[derive(Serialize)]
+#[allow(dead_code)]
 struct LogData<'a> {
     token: &'a str,
     log: LogPayload<'a>,
 }
 
 #[derive(Serialize)]
-struct LogPayload<'a> {
+#[allow(dead_code)]
+struct LogPayload<'a> { 
     app_id: &'a str,
     r#type: &'a str,
     message: Cow<'a, str>,
