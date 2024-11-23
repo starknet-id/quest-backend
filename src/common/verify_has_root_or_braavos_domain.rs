@@ -16,7 +16,6 @@ use starknet::{
 };
 use starknet_id::decode;
 
-#[allow(dead_code)]
 pub async fn verify_has_root_or_braavos_domain(
     state: Arc<AppState>,
     addr: &FieldElement,
