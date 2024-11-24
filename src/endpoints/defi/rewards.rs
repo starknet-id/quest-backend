@@ -16,7 +16,6 @@ use futures::stream::{FuturesOrdered, StreamExt};
 use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, USER_AGENT};
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware, Error};
 use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
-use reqwest_tracing::TracingMiddleware;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use starknet::{core::types::FieldElement, macros::selector};
@@ -37,7 +36,6 @@ pub async fn get_defi_rewards(
     // Retry up to 3 times with increasing intervals between attempts.
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
     let client = ClientBuilder::new(reqwest::Client::new())
-        .with(TracingMiddleware::default())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
 
