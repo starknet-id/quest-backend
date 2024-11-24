@@ -42,7 +42,7 @@ pub async fn get_defi_rewards(
         .build();
 
     let (zklend_rewards, nostra_rewards, nimbora_rewards, ekubo_rewards, vesu_rewards) = tokio::join!(
-        fetch_zklend_rewards(&client, &addr),
+        fetch_zklend_rewards(&client, &addr, &state),
         fetch_nostra_rewards(&client, &addr, &state),
         fetch_nimbora_rewards(&client, &addr, &state),
         fetch_ekubo_rewards(&client, &addr, &state),
@@ -85,7 +85,9 @@ pub async fn get_defi_rewards(
 async fn fetch_zklend_rewards(
     client: &ClientWithMiddleware,
     addr: &str,
+    state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
+    let logger = &state.logger;
     let zklend_url = format!("https://app.zklend.com/api/reward/all/{}", addr);
     let response = client
         .get(&zklend_url)
@@ -114,7 +116,7 @@ async fn fetch_zklend_rewards(
             Ok(rewards)
         }
         Err(err) => {
-            eprintln!("Failed to deserialize zkLend response: {:?}", err);
+            logger.warning(format!("Failed to deserialize zkLend response: {:?}", err));
             Err(Error::Reqwest(err))
         }
     }
@@ -125,6 +127,7 @@ async fn fetch_nostra_rewards(
     addr: &str,
     state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
+    let logger = &state.logger;
     let url =
         "https://us-east-2.aws.data.mongodb-api.com/app/data-yqlpb/endpoint/data/v1/action/find";
 
@@ -157,7 +160,10 @@ async fn fetch_nostra_rewards(
     let reward_periods = match periods_resp.json::<NostraPeriodsResponse>().await {
         Ok(result) => result,
         Err(err) => {
-            eprintln!("Failed to deserialize Nostra periods response: {:?}", err);
+            logger.warning(format!(
+                "Failed to deserialize Nostra periods response: {:?}",
+                err
+            ));
             NostraPeriodsResponse { documents: vec![] }
         }
     };
@@ -165,7 +171,10 @@ async fn fetch_nostra_rewards(
     let rewards = match rewards_resp.json::<NostraResponse>().await {
         Ok(result) => result,
         Err(err) => {
-            eprintln!("Failed to deserialize Nostra rewards response: {:?}", err);
+            logger.warning(format!(
+                "Failed to deserialize Nostra rewards response: {:?}",
+                err
+            ));
             return Err(Error::Reqwest(err));
         }
     };
@@ -227,6 +236,7 @@ async fn fetch_nimbora_rewards(
     addr: &str,
     state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
+    let logger = &state.logger;
     let config = &state.conf;
     let nimbora_url = format!(
         "https://strk-dist-backend.nimbora.io/get_calldata?address={}",
@@ -269,7 +279,7 @@ async fn fetch_nimbora_rewards(
             Ok(vec![reward])
         }
         Err(err) => {
-            eprintln!("Failed to deserialize nimbora response: {:?}", err);
+            logger.warning(format!("Failed to deserialize nimbora response: {:?}", err));
             Err(Error::Reqwest(err))
         }
     }
@@ -280,6 +290,7 @@ async fn fetch_ekubo_rewards(
     addr: &str,
     state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
+    let logger = &state.logger;
     let strk_token = state.conf.tokens.strk.clone();
     let ekubo_url = format!(
         "https://mainnet-api.ekubo.org/airdrops/{}?token={}",
@@ -292,7 +303,10 @@ async fn fetch_ekubo_rewards(
     let rewards = match response.json::<Vec<EkuboRewards>>().await {
         Ok(result) => result,
         Err(err) => {
-            eprintln!("Failed to deserialize Ekubo rewards response: {:?}", err);
+            logger.warning(format!(
+                "Failed to deserialize Ekubo rewards response: {:?}",
+                err
+            ));
             return Err(Error::Reqwest(err));
         }
     };
@@ -364,6 +378,7 @@ async fn fetch_vesu_rewards(
     addr: &str,
     state: &AppState,
 ) -> Result<Vec<CommonReward>, Error> {
+    let logger = &state.logger;
     let vesu_url = format!("https://api.vesu.xyz/users/{}/strk-rewards", addr);
     let response = client.get(&vesu_url).headers(get_headers()).send().await?;
 
@@ -405,7 +420,7 @@ async fn fetch_vesu_rewards(
             Ok(vec![reward])
         }
         Err(err) => {
-            eprintln!("Failed to deserialize vesu response: {:?}", err);
+            logger.warning(format!("Failed to deserialize vesu response: {:?}", err));
             Err(Error::Reqwest(err))
         }
     }
