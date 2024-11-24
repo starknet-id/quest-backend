@@ -25,22 +25,6 @@ lazy_static::lazy_static! {
     pub static ref ROUTE_REGISTRY: Mutex<Vec<Box<dyn WithState>>> = Mutex::new(Vec::new());
 }
 
-#[derive(Serialize)]
-#[allow(dead_code)]
-struct LogData<'a> {
-    token: &'a str,
-    log: LogPayload<'a>,
-}
-
-#[derive(Serialize)]
-#[allow(dead_code)]
-struct LogPayload<'a> { 
-    app_id: &'a str,
-    r#type: &'a str,
-    message: Cow<'a, str>,
-    timestamp: i64,
-}
-
 #[tokio::main]
 async fn main() {
     let conf = config::load();
