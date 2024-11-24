@@ -110,6 +110,12 @@ pub struct CompletedTaskDocument {
     timestamp: i64,
 }
 
+impl CompletedTaskDocument {
+    pub fn address(&self) -> &str {
+        &self.address
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Call {
     pub contract: String,
