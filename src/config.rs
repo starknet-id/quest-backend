@@ -43,12 +43,6 @@ pub_struct!(Clone, Deserialize; StarknetIdContracts {
     identity_contract: FieldElement,
 });
 
-pub_struct!(Clone, Deserialize;  NamingContract { address: String });
-
-pub_struct!(Clone, Deserialize;  StarknetId {
-    account_id: String,
-});
-
 pub_struct!(Clone, Deserialize;  Nostra {
     utils_contract: FieldElement,
     pairs : Vec<FieldElement>,
