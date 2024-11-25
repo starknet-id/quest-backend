@@ -174,7 +174,7 @@ pub_struct!(Deserialize; VerifyNewQuery {
 });
 
 pub_struct!(Deserialize; EmailQuery {
-    _addr: FieldElement,
+    addr: FieldElement,
     email: String,
 });
 
