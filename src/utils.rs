@@ -18,7 +18,6 @@ use mongodb::{
     IndexModel,
 };
 use rand::distributions::{Distribution, Uniform};
-// use serde_json::json;
 use starknet::signers::Signer;
 use starknet::{
     core::{
