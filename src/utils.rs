@@ -904,15 +904,16 @@ pub async fn check_if_unclaimed(
     calldata: Vec<FieldElement>,
     source: RewardSource,
 ) -> bool {
+    let logger = &state.logger;
     match read_contract(state, contract, selector, calldata).await {
         Ok(result) => result.get(0) == Some(&FieldElement::ZERO),
         Err(err) => {
-            eprintln!(
+            logger.severe(format!(
                 "Error checking {:?} claim status: {:?} in {}",
                 source,
                 err,
                 to_hex(contract)
-            );
+            ));
             false
         }
     }
