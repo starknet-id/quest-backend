@@ -24,7 +24,8 @@ use utils::WithState;
 lazy_static::lazy_static! {
     pub static ref ROUTE_REGISTRY: Mutex<Vec<Box<dyn WithState>>> = Mutex::new(Vec::new());
 }
-
+#[cfg(test)]
+mod tests;
 #[derive(Serialize)]
 struct LogData<'a> {
     token: &'a str,
