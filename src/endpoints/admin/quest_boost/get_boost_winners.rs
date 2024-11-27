@@ -20,7 +20,7 @@ pub struct GetBoostWinnersParams {
 #[route(get, "/admin/boosts/get_boost_winners", auth_middleware)]
 pub async fn get_boost_winners_handler(
     State(state): State<Arc<AppState>>,
-    Extension(_sub): Extension<String>, // Assuming admin authentication is handled
+    Extension(_sub): Extension<String>,
     Query(params): Query<GetBoostWinnersParams>,
 ) -> impl IntoResponse {
     let collection = state.db.collection::<BoostTable>("boosts");
