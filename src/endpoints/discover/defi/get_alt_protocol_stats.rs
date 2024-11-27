@@ -27,6 +27,7 @@ fn get_nimbora_strategy_map() -> HashMap<String, String> {
 
 #[route(get, "/discover/defi/get_alt_protocol_stats")]
 pub async fn handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+    let logger = &state.logger;
     let endpoint = &state.conf.discover.alt_protocols_api_endpoint;
     let client = reqwest::Client::new();
     let request_builder = client.get(endpoint);
@@ -85,7 +86,7 @@ pub async fn handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
                         }
                     }
                 } else {
-                    println!("Failed to fetch or parse Nimbora data");
+                    logger.info("Failed to fetch or parse Nimbora data".to_string());
                 }
 
                 return (StatusCode::OK, Json(new_map)).into_response();

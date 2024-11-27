@@ -12,11 +12,10 @@ use axum::{http::StatusCode, Router};
 use axum_auto_routes::route;
 use mongodb::{bson::doc, options::ClientOptions, Client};
 use reqwest::Url;
-use serde_derive::Serialize;
 use starknet::providers::{jsonrpc::HttpTransport, JsonRpcClient};
 use std::net::SocketAddr;
 use std::sync::Mutex;
-use std::{borrow::Cow, sync::Arc};
+use std::sync::Arc;
 use tokio::sync;
 use tower_http::cors::{Any, CorsLayer};
 use utils::WithState;
@@ -24,6 +23,7 @@ use utils::WithState;
 lazy_static::lazy_static! {
     pub static ref ROUTE_REGISTRY: Mutex<Vec<Box<dyn WithState>>> = Mutex::new(Vec::new());
 }
+
 #[cfg(test)]
 mod tests;
 #[derive(Serialize)]
@@ -39,6 +39,7 @@ struct LogPayload<'a> {
     message: Cow<'a, str>,
     timestamp: i64,
 }
+
 
 #[tokio::main]
 async fn main() {

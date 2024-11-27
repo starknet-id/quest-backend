@@ -18,7 +18,6 @@ use mongodb::{
     IndexModel,
 };
 use rand::distributions::{Distribution, Uniform};
-use serde_json::json;
 use starknet::signers::Signer;
 use starknet::{
     core::{
@@ -794,33 +793,6 @@ pub async fn verify_quest_auth(
         None => false,
     }
 }
-pub async fn make_api_request(endpoint: &str, addr: &str, api_key: Option<&str>) -> bool {
-    let client = reqwest::Client::new();
-    let request_builder = client.post(endpoint).json(&json!({
-        "address": addr,
-    }));
-    let key = api_key.unwrap_or("");
-    let request_builder = match key.is_empty() {
-        true => request_builder,
-        false => request_builder.header("apiKey", key),
-    };
-    match request_builder.send().await {
-        Ok(response) => match response.json::<serde_json::Value>().await {
-            Ok(json) => {
-                //check value of result in json
-                if let Some(data) = json.get("data") {
-                    if let Some(res) = data.get("result") {
-                        return res.as_bool().unwrap();
-                    }
-                }
-                false
-            }
-            Err(_) => false,
-        },
-        Err(_) => false,
-    };
-    false
-}
 
 // required for axum_auto_routes
 pub trait WithState: Send {
@@ -932,15 +904,16 @@ pub async fn check_if_unclaimed(
     calldata: Vec<FieldElement>,
     source: RewardSource,
 ) -> bool {
+    let logger = &state.logger;
     match read_contract(state, contract, selector, calldata).await {
         Ok(result) => result.get(0) == Some(&FieldElement::ZERO),
         Err(err) => {
-            eprintln!(
+            logger.severe(format!(
                 "Error checking {:?} claim status: {:?} in {}",
                 source,
                 err,
                 to_hex(contract)
-            );
+            ));
             false
         }
     }
