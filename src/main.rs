@@ -26,20 +26,6 @@ lazy_static::lazy_static! {
 
 #[cfg(test)]
 mod tests;
-#[derive(Serialize)]
-struct LogData<'a> {
-    token: &'a str,
-    log: LogPayload<'a>,
-}
-
-#[derive(Serialize)]
-struct LogPayload<'a> {
-    app_id: &'a str,
-    r#type: &'a str,
-    message: Cow<'a, str>,
-    timestamp: i64,
-}
-
 
 #[tokio::main]
 async fn main() {
