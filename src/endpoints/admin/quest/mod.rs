@@ -3,4 +3,4 @@ mod get_quest;
 pub mod get_quests;
 pub mod get_tasks;
 pub mod update_quest;
-pub mod get_quest_participants_handler;
+pub mod get_quest_participants;

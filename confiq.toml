@@ -1,0 +1,125 @@
+[server]
+port = 8080
+
+[database]
+name = "starkship_server"
+connection_string = "xxxxxx"
+
+[auth]
+secret_key = "secret_key"
+expiry_duration = 0
+
+[watchtower]
+endpoint = "https://api.watchtower.starknet.id/service/add_message"
+app_id = "XXXXXXXXXXXXXXXXX"
+token = "XXXXXXXXXXXXXXXXX"
+enabled = true
+[watchtower.types]
+info = "goerli/info"
+warning = "goerli/warning"
+severe = "goerli/severe"
+
+[discover]
+pairs_api_endpoint = "XXXXXXXX"
+lending_api_endpoint = "XXXXXXXX"
+derivates_api_endpoint = "XXXXXXXX"
+alt_protocols_api_endpoint = "XXXXXXXX"
+
+[rhino]
+api_endpoint="XXXXXXXXXXXX"
+
+[pyramid]
+api_endpoint="XXXXXXXXXXXX"
+
+[nft_contract]
+address = "0xFFFFFFFFFFFF"
+private_key = "1"
+
+[starknetid_contracts]
+naming_contract = "0xFFFFFFFFFFFF"
+verifier_contracts = [ "0xFFFFFFFFFFFF" ]
+identity_contract = "0xFFFFFFFFFFFF"
+
+[rango]
+api_endpoint="XXXXXXXXXXXXXXXXX"
+api_key="XXXXXXXXXXXXXXXXX"
+
+[quests]
+utils_contract = "0x012"
+[quests.sithswap]
+utils_contract = "0xFFFFFFFFFFFF"
+pairs = ["0xFFFFFFFFFFFF"]
+[quests.jediswap]
+utils_contract = "0xFFFFFFFFFFFF"
+pairs = ["0xFFFFFFFFFFFF"]
+[quests.carbonable]
+contract = "0x014c6533fec6fd168189b49150907db533e8be3a2e69b0657ae4ec6459a94668"
+[quests.hashstack]
+contract = "0x0"
+token_address = "0x0"
+[quests.zklend]
+contract = "0xFFFFFFFFFFFF"
+utils_contract = "0xFFFFFFFFFFFF"
+pairs = ["0xFFFFFFFFFFFF"]
+[quests.ekubo]
+contract = "0xFFFFFFFFFFFF"
+[quests.myswap]
+contract = "0xFFFFFFFFFFFF"
+[quests.braavos]
+api_key_user = "xxxxxx"
+api_key_claimed_mission = "xxxxxx"
+[quests.element]
+api_key = "xxxxxx"
+[quests.nostra]
+utils_contract = "0xFFFFFFFFFFFF"
+pairs = ["0xFFFFFFFFFFFF"]
+staking_contract="0xFFFFFFFFFFFF"
+[quests.haiko]
+api_endpoint = "xxxxxx"
+[quests.nimbora]
+contract = "0xFFFFFFFFFFFF"
+[quests.bountive]
+contract = "0xFFFFFFFFFFFF"
+[quests.sithswap_2]
+api_endpoint = "xxxxxxx"
+
+[rewards]
+[rewards.nimbora]
+contract = "0x07ed46700bd12bb1ee8a33a8594791003f9710a1ab18edd958aed86a8f82d3d1"
+[rewards.vesu]
+contract = "0x0387f3eb1d98632fbe3440a9f1385aec9d87b6172491d3dd81f1c35a7c61048f"
+
+[tokens]
+[tokens.strk]
+contract = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d"
+symbol = "STRK"
+decimals = 18
+
+[twitter]
+oauth2_clientid = "xxxxxx"
+oauth2_secret = "xxxxxx"
+
+[discord]
+oauth2_clientid = "xxxxxx"
+oauth2_secret = "xxxxxx"
+
+[variables]
+app_link = "https://starknet.quest"
+api_link = "https://api.starknet.quest"
+is_testnet = false
+rpc_url = "xxxxx"
+
+[starkscan]
+api_key = "xxxxxx"
+
+[achievements]
+[achievements.braavos]
+contract = "0x00057c4b510d66eb1188a7173f31cccee47b9736d40185da8144377b896d5ff3"
+[achievements.argent]
+contract = "0x01b22f7a9d18754c994ae0ee9adb4628d414232e3ebd748c386ac286f86c3066"
+[achievements.carbonable]
+contract = "0x0541b5dd5fae206ceccaf4eeb0642e4c04d456c5bc296eab047c9414bdad4f09"
+
+[quest_boost]
+private_key = "0xFFFFFFFFFFFF"
+update_interval = 600
