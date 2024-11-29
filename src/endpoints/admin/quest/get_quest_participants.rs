@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::collections::HashSet;
 use std::sync::Arc;
 
 use axum::{
@@ -12,8 +10,9 @@ use futures::StreamExt;
 use mongodb::bson::doc;
 use serde::Deserialize;
 use serde_json::json;
+use starknet::core::types::FieldElement;
 
-use crate::middleware::auth::auth_middleware;
+use crate::{middleware::auth::auth_middleware, utils::to_hex};
 use crate::{
     models::{AppState, CompletedTaskDocument, QuestTaskDocument},
     utils::get_error,
@@ -36,58 +35,66 @@ pub async fn get_quest_participants_handler(
 
     // Fetch all task IDs for the given quest_id
     let task_filter = doc! { "quest_id": params.quest_id };
-    let mut task_cursor = match tasks_collection.find(task_filter, None).await {
-        Ok(cursor) => cursor,
+    let task_ids: Vec<i32> = match tasks_collection.find(task_filter, None).await {
+        Ok(mut cursor) => {
+            let mut ids = Vec::new();
+            while let Some(doc) = cursor.next().await {
+                match doc {
+                    Ok(task) => ids.push(task.id),
+                    Err(e) => return get_error(format!("Error processing tasks: {}", e)),
+                }
+            }
+            ids
+        }
         Err(e) => return get_error(format!("Error fetching tasks: {}", e)),
     };
-
-    let mut task_ids = Vec::new();
-    while let Some(doc) = task_cursor.next().await {
-        match doc {
-            Ok(task) => task_ids.push(task.id),
-            Err(e) => return get_error(format!("Error processing tasks: {}", e)),
-        }
-    }
 
     if task_ids.is_empty() {
         return get_error(format!("No tasks found for quest_id {}", params.quest_id));
     }
 
-    let completed_task_filter = doc! { "task_id": { "$in": &task_ids } };
-    let mut completed_task_cursor = match completed_tasks_collection
-        .find(completed_task_filter, None)
-        .await
-    {
+    // Use aggregation pipeline to fetch completed tasks and group by address
+    let pipeline = vec![
+        doc! { "$match": { "task_id": { "$in": &task_ids } } },
+        doc! { "$group": {
+            "_id": "$address",
+            "task_ids": { "$addToSet": "$task_id" }
+        }},
+        doc! { "$project": {
+            "address": "$_id",
+            "tasks_completed_count": { "$size": "$task_ids" }
+        }},
+    ];
+
+    let mut cursor = match completed_tasks_collection.aggregate(pipeline, None).await {
         Ok(cursor) => cursor,
-        Err(e) => return get_error(format!("Error fetching completed tasks: {}", e)),
+        Err(e) => return get_error(format!("Error aggregating completed tasks: {}", e)),
     };
 
-    let mut address_task_map: HashMap<String, HashSet<i64>> = HashMap::new();
+    let total_tasks = task_ids.len();
+    let mut participants = Vec::new();
 
-    while let Some(doc) = completed_task_cursor.next().await {
+    while let Some(doc) = cursor.next().await {
         match doc {
-            Ok(task) => {
-                address_task_map
-                    .entry(task.address.clone())
-                    .or_insert_with(HashSet::new)
-                    .insert(task.task_id.into());
+            Ok(doc) => {
+                // Get the decimal address and convert it to a hex string
+                let address: String = match doc.get_str("address") {
+                    Ok(addr) => to_hex(FieldElement::from_dec_str(addr).unwrap()),
+                    Err(_) => continue, // Skip invalid documents
+                };
+
+                let tasks_completed_count: usize = match doc.get_i32("tasks_completed_count") {
+                    Ok(count) => count as usize,
+                    Err(_) => continue, // Skip invalid documents
+                };
+
+                if tasks_completed_count == total_tasks {
+                    participants.push(address);
+                }
             }
-            Err(e) => return get_error(format!("Error processing completed tasks: {}", e)),
+            Err(e) => return get_error(format!("Error processing aggregation results: {}", e)),
         }
     }
-
-    // Filter addresses who have completed all tasks
-    let total_tasks = task_ids.len();
-    let participants: Vec<String> = address_task_map
-        .into_iter()
-        .filter_map(|(address, tasks_completed)| {
-            if tasks_completed.len() == total_tasks {
-                Some(address)
-            } else {
-                None
-            }
-        })
-        .collect();
 
     let participants_json = json!({ "participants": participants });
     (StatusCode::OK, Json(participants_json)).into_response()
