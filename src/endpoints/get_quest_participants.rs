@@ -5,10 +5,10 @@ use axum::{
     Json,
 };
 
+use axum::http::StatusCode;
 use axum_auto_routes::route;
 use futures::StreamExt;
 use mongodb::bson::{doc, Document};
-use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

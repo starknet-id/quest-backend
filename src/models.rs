@@ -105,9 +105,9 @@ pub_struct!(Deserialize; CompletedTasks {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CompletedTaskDocument {
-    address: String,
-    task_id: u32,
-    timestamp: i64,
+    pub address: String,
+    pub task_id: u32,
+    pub timestamp: i64,
 }
 
 impl CompletedTaskDocument {
@@ -522,3 +522,7 @@ pub struct DefiReward {
     pub amount: FieldElement,
     pub token_symbol: String,
 }
+
+pub_struct!(Deserialize; GetQuestParticipantsParams {
+    quest_id: i64,
+});

@@ -41,12 +41,12 @@ use axum::{
 use axum_auto_routes::route;
 
 use crate::utils::get_timestamp_from_days;
+use axum::http::StatusCode;
 use axum::http::{header, Response};
 use chrono::Utc;
 use futures::TryStreamExt;
 use mongodb::bson::{doc, Document};
 use mongodb::Collection;
-use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 

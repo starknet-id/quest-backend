@@ -65,7 +65,8 @@ pub async fn handler(
 
     let mut state_last_id = state.last_question_id.lock().await;
 
-    let next_quiz_question_id = get_next_question_id(&quiz_questions_collection, state_last_id.clone()).await;
+    let next_quiz_question_id =
+        get_next_question_id(&quiz_questions_collection, state_last_id.clone()).await;
 
     *state_last_id = next_quiz_question_id;
 

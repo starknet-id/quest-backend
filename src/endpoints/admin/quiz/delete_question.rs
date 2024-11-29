@@ -65,7 +65,10 @@ pub async fn handler(
         "id": &body.id,
     };
 
-    return match quiz_questions_collection.delete_one(question_filter, None).await {
+    return match quiz_questions_collection
+        .delete_one(question_filter, None)
+        .await
+    {
         Ok(_) => (
             StatusCode::OK,
             Json(json!({"message": "deleted successfully"})),
