@@ -1,5 +1,4 @@
 use chrono::Utc;
-use reqwest;
 use serde_derive::Serialize;
 use std::borrow::Cow;
 use std::sync::Arc;

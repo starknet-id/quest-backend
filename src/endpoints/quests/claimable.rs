@@ -7,10 +7,10 @@ use axum::{
 
 use crate::models::{Reward, RewardResponse};
 use crate::utils::get_nft;
+use axum::http::StatusCode;
 use axum_auto_routes::route;
 use futures::TryStreamExt;
 use mongodb::bson::{doc, Document};
-use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use starknet::core::types::FieldElement;
 use starknet::signers::{LocalWallet, SigningKey};

@@ -8,12 +8,11 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use axum_auto_routes::route;
-use futures::{StreamExt, TryStreamExt};
+use futures::StreamExt;
 use mongodb::bson::doc;
 use serde::Deserialize;
 use serde_json::json;
 
-use crate::endpoints::admin::user;
 use crate::middleware::auth::auth_middleware;
 use crate::{
     models::{AppState, CompletedTaskDocument, QuestTaskDocument},

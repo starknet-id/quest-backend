@@ -1,6 +1,7 @@
 pub mod achievements;
 pub mod admin;
 pub mod analytics;
+pub mod defi;
 pub mod discover;
 pub mod get_boosted_quests;
 pub mod get_completed_quests;
@@ -17,4 +18,3 @@ pub mod leaderboard;
 pub mod quest_boost;
 pub mod quests;
 pub mod unique_page_visit;
-pub mod defi;

@@ -2,6 +2,7 @@ use crate::{
     models::{AppState, QuestDocument},
     utils::get_error,
 };
+use axum::http::StatusCode;
 use axum::{
     extract::{Query, State},
     response::IntoResponse,
@@ -10,7 +11,6 @@ use axum::{
 use axum_auto_routes::route;
 use futures::StreamExt;
 use mongodb::bson::{doc, from_document};
-use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use starknet::core::types::FieldElement;
 use std::sync::Arc;
