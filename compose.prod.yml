@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   quest_server:
     container_name: quest_server
