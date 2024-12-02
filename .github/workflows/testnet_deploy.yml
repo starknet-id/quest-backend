@@ -55,6 +55,6 @@ jobs:
             aws s3 cp s3://$AWS_PATH/ \$REPO_PATH --recursive
 
             cd ../api.starknet.id/
-            sudo docker-compose up --build -d quest_server
+            sudo docker compose up --build -d quest_server
 
           EOF
