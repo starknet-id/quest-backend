@@ -33,14 +33,21 @@ pub async fn handler(
         .unwrap();
     let data = response["data"].as_array().unwrap();
     let mut found = false;
+    let logger = &state.logger;
     for address in data {
-        if FieldElement::from_hex_be(address.as_str().unwrap()).expect("Failed to parse address")
-            == addr
-        {
-            found = true;
-            break;
+        match FieldElement::from_hex_be(address.as_str().unwrap()) {
+            Ok(parsed_address) => {
+                if parsed_address == addr {
+                    found = true;
+                    break;
+                }
+            }
+            Err(e) => {
+                logger.info(format!("Failed to parse address: {}", e));
+            }
         }
     }
+
     if found {
         match state.upsert_completed_task(addr, task_id).await {
             Ok(_) => (StatusCode::OK, Json(json!({"res": true}))).into_response(),
