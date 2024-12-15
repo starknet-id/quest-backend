@@ -1,5 +1,6 @@
 use crate::middleware::auth::auth_middleware;
 use crate::utils::verify_quest_auth;
+use crate::utils::to_hex;  
 use crate::{
     models::{AppState, CompletedTaskDocument, QuestDocument, QuestTaskDocument},
     utils::get_error,
@@ -14,6 +15,7 @@ use futures::TryStreamExt;
 use mongodb::bson::doc;
 use serde::Deserialize;
 use serde_json::json;
+use starknet::core::types::FieldElement;
 use std::collections::HashSet;
 use std::sync::Arc;
 
@@ -79,7 +81,10 @@ pub async fn get_quest_users_handler(
                 .map(|task: CompletedTaskDocument| task.address().to_string())
                 .collect();
 
-            let users_list: Vec<String> = user_set.into_iter().collect();
+            let users_list: Vec<String> = user_set
+                .into_iter()
+                .filter_map(|addr| FieldElement::from_dec_str(&addr).ok().map(to_hex))
+                .collect();
             users_list
         }
         Err(e) => return get_error(format!("Error processing completed tasks: {}", e)),
