@@ -62,7 +62,7 @@ cargo build --release
 To run the project successfully you'll need to do the following steps:
 1. Set Up a MongoDB Atlas Database:
 
-  - Go to MongoDB Atlas and create a free account if you don't have one.(`https://www.mongodb.com/products/platform/atlas-database`)
+  - Go to [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database) and create a free account if you don't have one.
 
   - Create a new cluster by following the instructions provided on the Atlas dashboard.
 
