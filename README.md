@@ -60,17 +60,23 @@ cargo build --release
 ## Running the Project
 
 To run the project successfully you'll need to do the following steps:
-1. Deploy `db-docker-compose.yml` file to use MongoDB database.
-Once inside the directory of the project, you need to run the following command:
-```bash
-docker-compose -f db-docker-compose.yml up -d
-```
-The command above will create a container running the MongoDB database, however the information you add to the database isn't persistent, you'll need to modify the db-docker-compose.yml file to include a volume. For more information regarding Docker-compose files and volumes go the this [page](https://docs.docker.com/engine/storage/volumes/).
+
+1.  Database Setup
+   1. Sign up for MongoDB Atlas:
+   - Visit MongoDB Atlas and create a free account(https://www.mongodb.com/products/platform/atlas-database).
+
+   2. Create a Cluster
+
+   3. Get Your Connection String:
+   - Navigate to your cluster and select "Connect".
+   - Choose "Connect to your application".
+   - Copy the provided connection string.
+
 
 2. Create `config.toml` file using the `config.template.toml` file.
 Create a `config.toml` file by copying and modifying the `config.template.toml` file. Make sure you update the following fields as required to run the project successfully:
 
-- `connection_string`, this is the string to connect to the database. If the `db-docker-compose.yml` isn't changed the connection string would be: `mongodb://quests:password@localhost:27017`
+- `connection_string`, this is the string to connect to the database.Replace the placeholder value of connection_string with the connection string copy from MongoDB Atlas.
 - `secret_key`, this is the secret used for the JWT token. You can change it or leave as is.
 - `expiry_duration`, this is the expiry duration of the JWT token. You should change it according to your needs the time is stored in miliseconds.
 - `rpc_url`, this is to interact with the blockchain you can use a public RPC such as [Lava](https://www.lavanet.xyz/get-started/starknet) or a private node provider such as [Alchemy](https://www.alchemy.com) or [Infura](https://www.infura.io). Alchemy and Infura require an account to get a private RPC, while Lava is completely public.
