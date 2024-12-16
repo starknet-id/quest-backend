@@ -47,7 +47,18 @@ pub_struct!(Debug, Serialize, Deserialize; QuestDocument {
     expired: Option<bool>,
     experience: i64,
     start_time: i64,
+    banner: Option<Banner>
 });
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Banner {
+    tag: String,
+    title: String,
+    description: String,
+    cta: String,
+    href: String,
+    image: String,
+}
 
 pub_struct!(Debug, Serialize, Deserialize; QuestInsertDocument {
     id: u32,
