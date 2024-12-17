@@ -24,7 +24,7 @@ If you don't have Rust installed, please go to the [Rust installation page](http
 
 Go to the [Git installation page](https://git-scm.com/downloads) and follow the instructions for your operating system to install Git.
 
-### Install Docker(optional)
+### Install Docker (optional)
 
 Docker may be useful for advanced setups but is not required for basic usage since we’re now leveraging MongoDB Atlas for database setup. If you wish to use Docker for other purposes, please ensure you have Docker engine version >= 1.13.0. Check your version with.
 
@@ -76,7 +76,7 @@ To run the project successfully you'll need to do the following steps:
 2. Create `config.toml` file using the `config.template.toml` file.
 Create a `config.toml` file by copying and modifying the `config.template.toml` file. Make sure you update the following fields as required to run the project successfully:
 
-- `connection_string`, this is the string to connect to the database.Replace with the MongoDB Atlas connection string here.
+- `connection_string`, this is the string to connect to the database. Replace with the MongoDB Atlas connection string here.
 - `secret_key`, this is the secret used for the JWT token. You can change it or leave as is.
 - `expiry_duration`, this is the expiry duration of the JWT token. You should change it according to your needs the time is stored in miliseconds.
 - `rpc_url`, this is to interact with the blockchain you can use a public RPC such as [Lava](https://www.lavanet.xyz/get-started/starknet) or a private node provider such as [Alchemy](https://www.alchemy.com) or [Infura](https://www.infura.io). Alchemy and Infura require an account to get a private RPC, while Lava is completely public.
