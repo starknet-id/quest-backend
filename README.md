@@ -24,9 +24,9 @@ If you don't have Rust installed, please go to the [Rust installation page](http
 
 Go to the [Git installation page](https://git-scm.com/downloads) and follow the instructions for your operating system to install Git.
 
-### Install Docker
+### Install Docker (optional)
 
-To run the database a Docker container is necessary, you need to have Docker engine version >= 1.13.0. To check your Docker engine version run the following command in a terminal.
+Docker may be useful for advanced setups but is not required for basic usage since we’re now leveraging MongoDB Atlas for database setup. If you wish to use Docker for other purposes, please ensure you have Docker engine version >= 1.13.0. Check your version with.
 
 ```bash
 docker --version
@@ -60,17 +60,23 @@ cargo build --release
 ## Running the Project
 
 To run the project successfully you'll need to do the following steps:
-1. Deploy `db-docker-compose.yml` file to use MongoDB database.
-Once inside the directory of the project, you need to run the following command:
-```bash
-docker-compose -f db-docker-compose.yml up -d
-```
-The command above will create a container running the MongoDB database, however the information you add to the database isn't persistent, you'll need to modify the db-docker-compose.yml file to include a volume. For more information regarding Docker-compose files and volumes go the this [page](https://docs.docker.com/engine/storage/volumes/).
+1. Set Up a MongoDB Atlas Database:
+
+  - Go to [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database) and create a free account if you don't have one.
+
+  - Create a new cluster by following the instructions provided on the Atlas dashboard.
+
+  - Once your cluster is ready, click on "Connect," then choose "Connect your application."
+
+  - Copy the connection string provided, which should look something like this:
+    [Example:]
+     ( mongodb+srv://<username>:<password>@cluster0.mongodb.net/<database>?retryWrites=true&w=majority )
+  - Make sure your IP address is whitelisted in the Atlas security settings.
 
 2. Create `config.toml` file using the `config.template.toml` file.
 Create a `config.toml` file by copying and modifying the `config.template.toml` file. Make sure you update the following fields as required to run the project successfully:
 
-- `connection_string`, this is the string to connect to the database. If the `db-docker-compose.yml` isn't changed the connection string would be: `mongodb://quests:password@localhost:27017`
+- `connection_string`, this is the string to connect to the database. Replace with the MongoDB Atlas connection string here.
 - `secret_key`, this is the secret used for the JWT token. You can change it or leave as is.
 - `expiry_duration`, this is the expiry duration of the JWT token. You should change it according to your needs the time is stored in miliseconds.
 - `rpc_url`, this is to interact with the blockchain you can use a public RPC such as [Lava](https://www.lavanet.xyz/get-started/starknet) or a private node provider such as [Alchemy](https://www.alchemy.com) or [Infura](https://www.infura.io). Alchemy and Infura require an account to get a private RPC, while Lava is completely public.
@@ -102,7 +108,7 @@ If your expected output doesn't includes the following text:
 database: connected
 server: listening on http://0.0.0.0:8080
 ```
-This means you didn't run the Docker container which runs the database. To fix this, you'll need to run the Docker container with the command mentioned in the first step of the section Running the Project.
+This means you didn't add MongoDB database. To fix this, you'll need to follow first step of the section Running the Project.
 
 If you get the following output:
 
@@ -157,11 +163,11 @@ error: process didn't exit successfully: `target\debug\quest_server.exe` (exit c
 
 This means you probably forgot the following character in the `config.toml` file: ". To fix this, you'll need to check that the fields you modified while creating the `config.toml` file have their opening and closing character. As an example, it should look like this:
 
-`connection_string = "mongodb://quests:password@localhost:27017"`
+`connection_string = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/<database>?retryWrites=true&w=majority"`
 
 and NOT like this
 
-`connection_string = "mongodb://quests:password@localhost:27017`
+`connection_string = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/<database>?retryWrites=true&w=majority`
 
 If you get the following output:
 
