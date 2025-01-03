@@ -57,19 +57,33 @@ pub async fn handler(
             "$group": {
                 "_id": "$address",
                 "count": { "$sum": 1 },
-                "last_completion": { "$max": "$timestamp" }  // Get the timestamp of their last task
+                "last_completion": { "$max": "$timestamp" }
             }
         },
-        // Filter for participants who completed all tasks
+        // Add a field to indicate if all tasks are completed
         doc! {
-            "$match": {
-                "count": tasks_count as i64
+            "$addFields": {
+                "completed_all": {
+                    "$eq": ["$count", tasks_count as i64]
+                }
             }
         },
-        // Sort by last completion time
+        // Conditionally set quest_completion_time based on completed_all
+        doc! {
+            "$addFields": {
+                "quest_completion_time": {
+                    "$cond": {
+                        "if": "$completed_all",
+                        "then": "$last_completion",
+                        "else": null
+                    }
+                }
+            }
+        },
+        // Sort by completion time (null values will be at the end)
         doc! {
             "$sort": {
-                "last_completion": 1
+                "quest_completion_time": 1
             }
         },
         doc! {
@@ -78,10 +92,10 @@ pub async fn handler(
                     { "$count": "count" }
                 ],
                 "participants": [
-                    { "$limit": 3 },
                     { "$project": {
                         "address": "$_id",
-                        "completion_time": "$last_completion",
+                        "tasks_completed": "$count",
+                        "quest_completion_time": 1,
                         "_id": 0
                     }}
                 ]
@@ -89,7 +103,7 @@ pub async fn handler(
         },
         doc! {
             "$project": {
-                "count": { "$ifNull": [{ "$arrayElemAt": ["$total.count", 0] }, 0] },
+                "total": { "$ifNull": [{ "$arrayElemAt": ["$total.count", 0] }, 0] },
                 "first_participants": "$participants"
             }
         },
@@ -165,23 +179,42 @@ mod tests {
         }
 
         // Insert completed tasks for participants
+        // Each participant will have a different timestamp for each task
+        // timestamp will be 1000 - (participant * 10) + task_id
+        // This way, the last task for each participant will have the highest timestamp
+        // and the last participant will be the one who completed the quest first
+
+        // 2..=num_participants: skip the first participant
+        // The first participant haven't completed all the tasks
         for participant in 1..=num_participants {
             let address = format!("participant_{}", participant);
-            let base_timestamp = 1000 - (participant * 10); // Spaces out timestamps more clearly
+            let base_timestamp = 1000 - (participant * 10); 
 
-            for task_id in 1..=num_tasks {
-                completed_tasks_collection
-                    .insert_one(
-                        doc! {
-                            "address": address.clone(),
-                            "task_id": task_id,
-                            // Last task for each participant will have the highest timestamp
-                            "timestamp": base_timestamp + task_id
-                        },
-                        None,
-                    )
-                    .await
-                    .unwrap();
+            // First participant only do one task => not completed the quest yet
+            if participant == 1 {
+                completed_tasks_collection.insert_one(
+                    doc! {
+                        "address": address.clone(),
+                        "task_id": 1,
+                        "timestamp": base_timestamp + 1
+                    },
+                    None,
+                ).await.unwrap();
+            } else {
+                for task_id in 1..=num_tasks {
+                    completed_tasks_collection
+                        .insert_one(
+                            doc! {
+                                "address": address.clone(),
+                                "task_id": task_id,
+                                // Last task for each participant will have the highest timestamp
+                                "timestamp": base_timestamp + task_id
+                            },
+                            None,
+                        )
+                        .await
+                        .unwrap();
+                }
             }
         }
     }
@@ -234,20 +267,25 @@ mod tests {
         // Parse the body
         let body: Value = serde_json::from_slice(&body_bytes).unwrap();
 
-        assert_eq!(body["count"], num_participants);
-        assert_eq!(body["first_participants"].as_array().unwrap().len(), 3);
-        println!("{:?}", body);
+        // We has excluded the first participant from the test data
+        assert_eq!(body["total"], num_participants);
 
-        // Verify first participants format
+        // Verify first participants
         let first_participants = body["first_participants"].as_array().unwrap();
-        for participant in first_participants {
-            assert!(participant.as_str().unwrap().starts_with("participant_"));
-        }
 
-        // Verify quest completion timestamp format
-        let quest_completion_timestamp = body["first_participants"][0]["completion_time"]
+        // Verify quest completion timestamp
+        let quest_completion_timestamp = body["first_participants"][1]["quest_completion_time"]
             .as_i64()
             .unwrap();
-        assert_eq!(quest_completion_timestamp, 973);
+        assert_eq!(quest_completion_timestamp, 953);
+
+        // Verify participant not completed the quest
+        let participant_not_completed = first_participants.iter().find(|participant| {
+            participant["address"].as_str().unwrap() == "participant_1"
+        }).unwrap();
+
+        assert_eq!(participant_not_completed["tasks_completed"].as_i64().unwrap(), 1);
+        assert_eq!(participant_not_completed["quest_completion_time"].as_i64(), None); // Not completed
+
     }
 }
