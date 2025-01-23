@@ -23,6 +23,7 @@ pub_struct!(Deserialize; CreateBalance {
     contracts: Option<String>,
     href: Option<String>,
     cta: Option<String>,
+    overwrite_order: Option<i32>,
 });
 
 // Helper function to convert FieldElement to Bson
@@ -61,6 +62,9 @@ pub async fn handler(
     }
     if let Some(cta) = &body.cta {
         update_doc.insert("cta", cta);
+    }
+    if let Some(overwrite_order) = &body.overwrite_order {
+        update_doc.insert("overwrite_order", overwrite_order);
     }
     if let Some(contracts) = &body.contracts {
         let parsed_contracts: Vec<FieldElement> = contracts
