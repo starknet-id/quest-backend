@@ -8,6 +8,7 @@ use axum::{
 };
 use axum_auto_routes::route;
 use mongodb::bson::{doc, Document};
+use mongodb::options::FindOneAndUpdateOptions;
 use serde::Deserialize;
 use serde_json::json;
 use std::sync::Arc;
@@ -35,24 +36,23 @@ pub async fn handler(
     Json(body): Json<UpdateQuestQuery>,
 ) -> impl IntoResponse {
     let collection = state.db.collection::<QuestDocument>("quests");
-
+    
     // filter to get existing quest
     let mut filter = doc! {
         "id": &body.id,
     };
-
+    
     // check if user is super_user
     if sub != "super_user" {
         filter.insert("issuer", sub);
     }
-
+    
     let existing_quest = &collection.find_one(filter.clone(), None).await.unwrap();
     if existing_quest.is_none() {
         return get_error("quest does not exist".to_string());
     }
-
+    
     let mut update_doc = Document::new();
-
     if let Some(name) = &body.name {
         update_doc.insert("name", name);
     }
@@ -94,18 +94,54 @@ pub async fn handler(
     if let Some(title_card) = &body.title_card {
         update_doc.insert("title_card", title_card);
     }
-
+    
     // update quest query
     let update = doc! {
-        "$set": update_doc
+        "$set": update_doc.clone()
     };
-
-    return match collection.find_one_and_update(filter, update, None).await {
+    
+    // Perform quest update
+    let quest_update_result = collection.find_one_and_update(filter.clone(), update, None).await;
+    
+    // Update NFT URI collection
+    let nft_uri_collection = state.db.collection::<Document>("nft_uri");
+    let nft_uri_filter = doc! { "id": &body.id };
+    
+    // Prepare update for nft_uri
+    let mut nft_update_doc = Document::new();
+    if let Some(rewards_img) = &body.rewards_img {
+        nft_update_doc.insert("image", rewards_img);
+    }
+    if let Some(rewards_title) = &body.rewards_title {
+        nft_update_doc.insert("name", rewards_title);
+    }
+    if let Some(desc) = &body.desc {
+        nft_update_doc.insert("description", desc);
+    }
+    
+    // Update nft_uri collection
+    if !nft_update_doc.is_empty() {
+        let nft_update = doc! { "$set": nft_update_doc };
+        let nft_uri_update_result = nft_uri_collection
+            .find_one_and_update(nft_uri_filter, nft_update, FindOneAndUpdateOptions::default())
+            .await;
+        
+        // Handle quest and NFT URI update results
+        return match (quest_update_result, nft_uri_update_result) {
+            (Ok(_), Ok(_)) => (
+                StatusCode::OK,
+                Json(json!({"message": "updated successfully"})),
+            ).into_response(),
+            _ => get_error("error updating quest or nft_uri".to_string()),
+        };
+    }
+    
+    // If no NFT URI updates, just handle quest update
+    return match quest_update_result {
         Ok(_) => (
             StatusCode::OK,
             Json(json!({"message": "updated successfully"})),
-        )
-            .into_response(),
+        ).into_response(),
         Err(_e) => get_error("error updating quest".to_string()),
     };
 }
