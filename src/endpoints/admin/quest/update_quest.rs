@@ -103,11 +103,9 @@ pub async fn handler(
     // Perform quest update
     let quest_update_result = collection.find_one_and_update(filter.clone(), update, None).await;
     
-    // Update NFT URI collection
     let nft_uri_collection = state.db.collection::<Document>("nft_uri");
     let nft_uri_filter = doc! { "id": &body.id };
     
-    // Prepare update for nft_uri
     let mut nft_update_doc = Document::new();
     if let Some(rewards_img) = &body.rewards_img {
         nft_update_doc.insert("image", rewards_img);
@@ -119,14 +117,12 @@ pub async fn handler(
         nft_update_doc.insert("description", desc);
     }
     
-    // Update nft_uri collection
     if !nft_update_doc.is_empty() {
         let nft_update = doc! { "$set": nft_update_doc };
         let nft_uri_update_result = nft_uri_collection
             .find_one_and_update(nft_uri_filter, nft_update, FindOneAndUpdateOptions::default())
             .await;
         
-        // Handle quest and NFT URI update results
         return match (quest_update_result, nft_uri_update_result) {
             (Ok(_), Ok(_)) => (
                 StatusCode::OK,
@@ -136,7 +132,6 @@ pub async fn handler(
         };
     }
     
-    // If no NFT URI updates, just handle quest update
     return match quest_update_result {
         Ok(_) => (
             StatusCode::OK,
