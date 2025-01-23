@@ -1,5 +1,5 @@
 use crate::middleware::auth::auth_middleware;
-use crate::models::QuestDocument;
+use crate::models::{QuestDocument, Banner};
 use crate::{models::AppState, utils::get_error};
 use axum::{
     extract::{Extension, State},
@@ -7,7 +7,7 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use axum_auto_routes::route;
-use mongodb::bson::{doc, Document};
+use mongodb::bson::{doc, Document, to_bson};
 use serde::Deserialize;
 use serde_json::json;
 use std::sync::Arc;
@@ -26,6 +26,7 @@ pub_struct!(Deserialize; UpdateQuestQuery {
     img_card: Option<String>,
     title_card: Option<String>,
     issuer: Option<String>,
+    banner: Option<Banner>,
 });
 
 #[route(post, "/admin/quest/update", auth_middleware)]
@@ -94,6 +95,9 @@ pub async fn handler(
     if let Some(title_card) = &body.title_card {
         update_doc.insert("title_card", title_card);
     }
+    if let Some(banner) = &body.banner {
+        update_doc.insert("banner", to_bson(&banner).unwrap());
+    }
 
     // update quest query
     let update = doc! {
@@ -108,4 +112,36 @@ pub async fn handler(
             .into_response(),
         Err(_e) => get_error("error updating quest".to_string()),
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mongodb::bson::Bson;
+
+    #[test]
+    fn test_banner_serialization() {
+        let banner = Banner {
+            tag: "Test Tag".to_string(),
+            title: "Test Title".to_string(),
+            description: "Test Description".to_string(),
+            cta: "Test CTA".to_string(),
+            href: "https://test.com".to_string(),
+            image: "https://test.com/image.png".to_string(),
+        };
+        
+        let serialized = to_bson(&banner).unwrap();
+        
+        // Verify it serializes to a BSON document
+        assert!(matches!(serialized, Bson::Document(_)));
+        
+        if let Bson::Document(doc) = serialized {
+            assert_eq!(doc.get_str("tag").unwrap(), "Test Tag");
+            assert_eq!(doc.get_str("title").unwrap(), "Test Title");
+            assert_eq!(doc.get_str("description").unwrap(), "Test Description");
+            assert_eq!(doc.get_str("cta").unwrap(), "Test CTA");
+            assert_eq!(doc.get_str("href").unwrap(), "https://test.com");
+            assert_eq!(doc.get_str("image").unwrap(), "https://test.com/image.png");
+        }
+    }
 }
