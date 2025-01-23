@@ -7,8 +7,11 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use axum_auto_routes::route;
+
 use mongodb::bson::{doc, Document};
 use mongodb::options::FindOneAndUpdateOptions;
+
+use mongodb::bson::{Bson, doc, Document};
 use serde::Deserialize;
 use serde_json::json;
 use std::sync::Arc;
@@ -20,6 +23,7 @@ pub_struct!(Deserialize; UpdateQuestQuery {
     start_time: Option<i64>,
     expiry: Option<i64>,
     disabled: Option<bool>,
+    mandatory_domain: Option<String>,
     category: Option<String>,
     logo: Option<String>,
     rewards_img: Option<String>,
@@ -68,6 +72,13 @@ pub async fn handler(
     if let Some(disabled) = &body.disabled {
         update_doc.insert("disabled", disabled);
     }
+    update_doc.insert(
+        "mandatory_domain",
+        body.mandatory_domain
+            .clone()
+            .map_or(Bson::Null, |v| Bson::String(v)),
+    );
+
     if let Some(category) = &body.category {
         update_doc.insert("category", category);
     }

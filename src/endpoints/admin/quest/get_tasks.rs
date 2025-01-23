@@ -25,6 +25,8 @@ pub struct UserTask {
     quiz_name: Option<i64>,
     task_type: Option<String>,
     discord_guild_id: Option<String>,
+    api_url: Option<String>,
+    regex: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -83,6 +85,8 @@ pub async fn handler(
                 "quiz_name": 1,
                 "task_type":1,
                 "discord_guild_id": 1,
+                "api_url": 1,
+                "regex": 1,
             }
         },
     ];
