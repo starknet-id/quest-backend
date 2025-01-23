@@ -26,6 +26,7 @@ pub_struct!(Deserialize; CreateQuestQuery {
     img_card: String,
     title_card: String,
     issuer: Option<String>,
+    mandatory_domain: Option<String>,
 });
 
 #[route(post, "/admin/quest/create", auth_middleware)]
@@ -69,6 +70,7 @@ pub async fn handler(
         "logo": &body.logo,
         "img_card": &body.img_card,
         "title_card": &body.title_card,
+        "mandatory_domain": &body.mandatory_domain,
     };
 
     match &body.expiry {

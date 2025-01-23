@@ -7,7 +7,10 @@ use axum::{
     response::{IntoResponse, Json},
 };
 use axum_auto_routes::route;
-use mongodb::bson::{doc, Document, to_bson};
+
+use mongodb::options::FindOneAndUpdateOptions;
+
+use mongodb::bson::{doc, Bson, Document};
 use serde::Deserialize;
 use serde_json::json;
 use std::sync::Arc;
@@ -19,6 +22,7 @@ pub_struct!(Deserialize; UpdateQuestQuery {
     start_time: Option<i64>,
     expiry: Option<i64>,
     disabled: Option<bool>,
+    mandatory_domain: Option<String>,
     category: Option<String>,
     logo: Option<String>,
     rewards_img: Option<String>,
@@ -53,7 +57,6 @@ pub async fn handler(
     }
 
     let mut update_doc = Document::new();
-
     if let Some(name) = &body.name {
         update_doc.insert("name", name);
     }
@@ -69,6 +72,13 @@ pub async fn handler(
     if let Some(disabled) = &body.disabled {
         update_doc.insert("disabled", disabled);
     }
+    update_doc.insert(
+        "mandatory_domain",
+        body.mandatory_domain
+            .clone()
+            .map_or(Bson::Null, |v| Bson::String(v)),
+    );
+
     if let Some(category) = &body.category {
         update_doc.insert("category", category);
     }
@@ -101,10 +111,49 @@ pub async fn handler(
 
     // update quest query
     let update = doc! {
-        "$set": update_doc
+        "$set": update_doc.clone()
     };
 
-    return match collection.find_one_and_update(filter, update, None).await {
+    // Perform quest update
+    let quest_update_result = collection
+        .find_one_and_update(filter.clone(), update, None)
+        .await;
+
+    let nft_uri_collection = state.db.collection::<Document>("nft_uri");
+    let nft_uri_filter = doc! { "id": &body.id };
+
+    let mut nft_update_doc = Document::new();
+    if let Some(rewards_img) = &body.rewards_img {
+        nft_update_doc.insert("image", rewards_img);
+    }
+    if let Some(rewards_title) = &body.rewards_title {
+        nft_update_doc.insert("name", rewards_title);
+    }
+    if let Some(desc) = &body.desc {
+        nft_update_doc.insert("description", desc);
+    }
+
+    if !nft_update_doc.is_empty() {
+        let nft_update = doc! { "$set": nft_update_doc };
+        let nft_uri_update_result = nft_uri_collection
+            .find_one_and_update(
+                nft_uri_filter,
+                nft_update,
+                FindOneAndUpdateOptions::default(),
+            )
+            .await;
+
+        return match (quest_update_result, nft_uri_update_result) {
+            (Ok(_), Ok(_)) => (
+                StatusCode::OK,
+                Json(json!({"message": "updated successfully"})),
+            )
+                .into_response(),
+            _ => get_error("error updating quest or nft_uri".to_string()),
+        };
+    }
+
+    return match quest_update_result {
         Ok(_) => (
             StatusCode::OK,
             Json(json!({"message": "updated successfully"})),

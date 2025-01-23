@@ -489,7 +489,7 @@ pub struct VesuData {
 pub struct VesuDistributorData {
     pub distributed_amount: String,
     pub claimed_amount: String,
-    pub call_data: VesuCallData,
+    pub call_data: Option<VesuCallData>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
