@@ -2,11 +2,11 @@ use axum::{
     extract::{Multipart, Path},
     http::StatusCode,
     response::IntoResponse,
+    routing::post,
+    Router,
 };
-use axum_auto_routes::route;
 use std::{fs::create_dir_all, path::Path as FilePath};
 
-#[route(post, "/admin/upload_image/:image_name")]
 pub async fn upload_image_handler(
     Path(image_name): Path<String>,
     mut multipart: Multipart,
@@ -31,3 +31,8 @@ pub async fn upload_image_handler(
 
     (StatusCode::BAD_REQUEST, "No valid file provided").into_response()
 }
+
+pub fn admin_routes() -> Router {
+    Router::new().route("/admin/upload_image/:image_name", post(upload_image_handler))
+}
+
