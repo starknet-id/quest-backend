@@ -1,38 +1,55 @@
+use crate::middleware::auth::auth_middleware;
+use crate::models::AppState;
+use crate::utils::get_error;
 use axum::{
-    extract::{Multipart, Path},
+    extract::{Extension, Multipart, Path, State},
     http::StatusCode,
-    response::IntoResponse,
-    routing::post,
-    Router,
+    response::{IntoResponse, Json},
 };
+use axum_auto_routes::route;
+use serde_json::json;
+use std::sync::Arc;
 use std::{fs::create_dir_all, path::Path as FilePath};
 
+#[route(post, "/admin/images/upload/:image_name", auth_middleware)]
 pub async fn upload_image_handler(
+    State(state): State<Arc<AppState>>,
+    Extension(sub): Extension<String>, // Example if sub is needed for authorization
     Path(image_name): Path<String>,
     mut multipart: Multipart,
 ) -> impl IntoResponse {
     let images_folder = "./images";
     if !FilePath::new(images_folder).exists() {
-        create_dir_all(images_folder).unwrap();
+        if let Err(e) = create_dir_all(images_folder) {
+            return get_error(format!("Failed to create images folder: {}", e));
+        }
     }
 
-    while let Some(field) = multipart.next_field().await.unwrap() {
+    while let Some(field) = multipart.next_field().await.unwrap_or_else(|_| None) {
         if let Some(filename) = field.file_name() {
             if filename.ends_with(".webp") {
                 let filepath = format!("{}/{}.webp", images_folder, image_name);
-                let data = field.bytes().await.unwrap();
-                tokio::fs::write(filepath, data).await.unwrap();
-                return StatusCode::OK.into_response();
+                let data = match field.bytes().await {
+                    Ok(data) => data,
+                    Err(e) => {
+                        return get_error(format!("Failed to read file data: {}", e));
+                    }
+                };
+
+                if let Err(e) = tokio::fs::write(&filepath, data).await {
+                    return get_error(format!("Failed to write file: {}", e));
+                }
+
+                return (
+                    StatusCode::OK,
+                    Json(json!({"message": "File uploaded successfully"})),
+                )
+                    .into_response();
             } else {
-                return (StatusCode::BAD_REQUEST, "Only .webp files are allowed").into_response();
+                return get_error("Only .webp files are allowed".to_string());
             }
         }
     }
 
-    (StatusCode::BAD_REQUEST, "No valid file provided").into_response()
+    get_error("No valid file provided".to_string())
 }
-
-pub fn admin_routes() -> Router {
-    Router::new().route("/admin/upload_image/:image_name", post(upload_image_handler))
-}
-
