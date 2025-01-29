@@ -85,13 +85,21 @@ pub async fn get_quest_participants_handler(
                     Err(_) => continue, // Skip invalid documents
                 };
 
+                let timestamp = match doc.get_i64("quest_completion_timestamp") {
+                    Ok(ts) => ts,
+                    Err(_) => continue, // Skip invalid documents
+                };
+
                 let tasks_completed_count: usize = match doc.get_i32("tasks_completed_count") {
                     Ok(count) => count as usize,
                     Err(_) => continue, // Skip invalid documents
                 };
 
                 if tasks_completed_count == total_tasks {
-                    participants.push(address);
+                    participants.push(json!({
+                        "address": address,
+                        "quest_completion_timestamp": timestamp,
+                    }));
                 }
             }
             Err(e) => return get_error(format!("Error processing aggregation results: {}", e)),
@@ -101,4 +109,3 @@ pub async fn get_quest_participants_handler(
     let participants_json = json!({ "participants": participants });
     (StatusCode::OK, Json(participants_json)).into_response()
 }
-
