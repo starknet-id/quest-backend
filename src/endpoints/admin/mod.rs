@@ -11,4 +11,5 @@ pub mod quest;
 pub mod quest_boost;
 pub mod quiz;
 pub mod twitter;
+pub mod upload_image;
 pub mod user;

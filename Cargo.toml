@@ -11,11 +11,11 @@ starknet-id = { git = "https://github.com/starknet-id/starknet-id.rs.git", rev =
 serde_derive = "1.0.183"
 env_logger = "0.10.0"
 axum_auto_routes = { git = "https://github.com/Th0rgal/axum_auto_routes.git", rev = "4bcae49628a657ed4bdc1749dfd4f1221ffaffe7" }
-axum = "0.6.17"
+axum = { version = "0.6.17", features = ["multipart"] }
 toml = "0.5.10"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.96"
-tokio = { version = "1.26.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.26.0", features = ["full", "macros", "rt-multi-thread"] }
 tower-http = { version = "0.4.0", features = ["cors"] }
 mongodb = "2.4.0"
 futures = "0.3.28"
