@@ -26,7 +26,7 @@ pub mod tests {
         let response = client.get(endpoint).send().await.unwrap();
         assert_eq!(response.status(), StatusCode::OK);
     }
-  
+
     #[tokio::test]
     pub async fn test_ok_with_address_without_callback() {
         let address = "0x05f1f8de723d8117daa26ec24320d0eacabc53a3d642acb0880846486e73283a";
