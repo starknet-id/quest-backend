@@ -382,20 +382,31 @@ async fn fetch_vesu_rewards(
 
     match response.json::<VesuRewards>().await {
         Ok(result) => {
+            let call_data = match result.data.distributor_data.call_data {
+                Some(data) => data,
+                None => {
+                    logger.warning("Vesu response missing callData field");
+                    return Ok(vec![]);
+                }
+            };
+
             let strk_token = state.conf.tokens.strk.clone();
             let config = &state.conf;
+
             let disctributed_amount: FieldElement = result
                 .data
                 .distributor_data
                 .distributed_amount
                 .parse()
                 .expect("Failed to parse string to integer");
+
             let claimed_amount: FieldElement = result
                 .data
                 .distributor_data
                 .claimed_amount
                 .parse()
                 .expect("Failed to parse string to integer");
+
             let amount = disctributed_amount - claimed_amount;
 
             // If amount is 0, return empty vector
@@ -406,7 +417,7 @@ async fn fetch_vesu_rewards(
             let reward = CommonReward {
                 amount: disctributed_amount,
                 displayed_amount: amount,
-                proof: result.data.distributor_data.call_data.proof,
+                proof: call_data.proof,
                 reward_id: None,
                 claim_contract: config.rewards.vesu.contract,
                 token_symbol: strk_token.symbol,
@@ -419,7 +430,8 @@ async fn fetch_vesu_rewards(
         }
         Err(err) => {
             logger.warning(format!("Failed to deserialize vesu response: {:?}", err));
-            Err(Error::Reqwest(err))
+            // Err(Error::Reqwest(err))
+            Ok(vec![]) // Return empty vector instead of error
         }
     }
 }
