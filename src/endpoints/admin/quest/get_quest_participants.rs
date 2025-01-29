@@ -59,7 +59,7 @@ pub async fn get_quest_participants_handler(
         doc! { "$group": {
             "_id": "$address",
             "task_ids": { "$addToSet": "$task_id" },
-            "max_timestamp": { "$max": "$timestamp.$numberLong" }
+            "max_timestamp": { "$max": "$timestamp" }
         }},
         doc! { "$project": {
             "address": "$_id",
@@ -101,3 +101,4 @@ pub async fn get_quest_participants_handler(
     let participants_json = json!({ "participants": participants });
     (StatusCode::OK, Json(participants_json)).into_response()
 }
+
