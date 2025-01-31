@@ -52,12 +52,12 @@ pub_struct!(Debug, Serialize, Deserialize; QuestDocument {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Banner {
-    tag: String,
-    title: String,
-    description: String,
-    cta: String,
-    href: String,
-    image: String,
+    pub tag: String,
+    pub title: String,
+    pub description: String,
+    pub cta: String,
+    pub href: String,
+    pub image: String,
 }
 
 pub_struct!(Debug, Serialize, Deserialize; QuestInsertDocument {

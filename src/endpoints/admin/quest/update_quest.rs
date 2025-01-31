@@ -1,6 +1,6 @@
 use crate::middleware::auth::auth_middleware;
-use crate::models::QuestDocument;
-use crate::{models::AppState, utils::get_error};
+use crate::models::{AppState, QuestDocument, Banner};
+use crate::utils::get_error;
 use axum::{
     extract::{Extension, State},
     http::StatusCode,
@@ -10,7 +10,7 @@ use axum_auto_routes::route;
 
 use mongodb::options::FindOneAndUpdateOptions;
 
-use mongodb::bson::{doc, Bson, Document};
+use mongodb::bson::{doc, Bson, Document, to_bson};
 use serde::Deserialize;
 use serde_json::json;
 use std::sync::Arc;
@@ -30,6 +30,7 @@ pub_struct!(Deserialize; UpdateQuestQuery {
     img_card: Option<String>,
     title_card: Option<String>,
     issuer: Option<String>,
+    banner: Option<Banner>,    
 });
 
 #[route(post, "/admin/quest/update", auth_middleware)]
@@ -104,6 +105,10 @@ pub async fn handler(
     if let Some(title_card) = &body.title_card {
         update_doc.insert("title_card", title_card);
     }
+
+    if let Some(banner) = &body.banner {
+        update_doc.insert("banner", to_bson(&banner).unwrap());
+    }    
 
     // update quest query
     let update = doc! {
