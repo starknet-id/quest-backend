@@ -44,4 +44,31 @@ pub mod tests {
             "Expected empty rewards array for address without callback data"
         );
     }
+
+    #[tokio::test]
+    pub async fn test_update_quest_with_banner() {
+        use crate::models::Banner;
+        use mongodb::bson::{doc, to_bson, from_bson};
+    
+        let banner = Banner {
+            tag: "Test tag".to_string(),
+            title: "Test title".to_string(),
+            description: "Test description".to_string(),
+            cta: "Test cta".to_string(),
+            href: "https://test.com/event".to_string(),
+            image: "https://test.com/image.png".to_string(),
+        };
+    
+        //Serialization and deserialization
+        let bson_banner = to_bson(&banner).unwrap();
+        let deserialized_banner: Banner = from_bson(bson_banner.clone()).unwrap();
+        assert_eq!(banner.tag, deserialized_banner.tag);
+        assert_eq!(banner.title, deserialized_banner.title);
+    
+        //Inserting into the update document
+        let mut update_doc = doc! {};
+        update_doc.insert("banner", bson_banner.clone());
+        assert_eq!(update_doc.get("banner").unwrap(), &bson_banner);
+    }    
+
 }
